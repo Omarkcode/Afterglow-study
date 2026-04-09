@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Afterglow Study</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;700&family=Noto+Naskh+Arabic:wght@400;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- City lights canvas — anchored to the bottom -->
+  <canvas id="cityCanvas"></canvas>
+
+  <!-- Moon glow — top right corner -->
+  <div class="moon" aria-hidden="true"></div>
+
+  <!-- Animated title -->
+  <div class="title-wrap" id="titleWrap">
+    <h1 class="title" id="mainTitle"></h1>
+    <span class="cursor" id="typeCursor" aria-hidden="true">|</span>
+  </div>
+
+  <!-- Study button (not wired up yet) -->
+  <button class="study-btn" type="button">Study</button>
+
+  <script src="script.js"></script>
+</body>
+</html>
