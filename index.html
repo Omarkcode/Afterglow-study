@@ -16,16 +16,16 @@
 </head>
 <body>
 
-  <!-- Sky canvas — stars & galaxy, sits behind everything -->
+  <!-- Sky canvas -->
   <canvas id="skyCanvas"></canvas>
 
-  <!-- City canvas — buildings & amber lights -->
+  <!-- City canvas -->
   <canvas id="cityCanvas"></canvas>
 
-  <!-- Moon glow — top right corner -->
+  <!-- Moon -->
   <div class="moon" aria-hidden="true"></div>
 
-  <!-- Pen nib — glowing tip that moves as the title is written -->
+  <!-- Pen nib (kept hidden, reserved for future use) -->
   <div class="pen-nib" id="penNib" aria-hidden="true"></div>
 
   <!-- Animated title -->
@@ -33,9 +33,57 @@
     <h1 class="title" id="mainTitle"></h1>
   </div>
 
-  <!-- Study button (not wired up yet) -->
+  <!-- Study button — opens login / sign-up modal -->
   <button class="study-btn" type="button">Study</button>
 
+  <!-- ══ Auth Modal ══════════════════════════════════════════ -->
+  <div class="auth-overlay" id="authOverlay" aria-modal="true" role="dialog">
+    <div class="auth-card">
+
+      <button class="auth-close" id="authClose" aria-label="Close">✕</button>
+      <h2 class="auth-brand">Afterglow Study</h2>
+
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tabSignup">Create Account</button>
+        <button class="auth-tab"        id="tabLogin">Sign In</button>
+      </div>
+
+      <!-- Sign-up form -->
+      <form class="auth-form" id="signupForm" novalidate>
+        <input class="auth-input" type="text"     id="signupUsername" placeholder="Username"
+               autocomplete="username" required />
+        <input class="auth-input" type="email"    id="signupEmail"    placeholder="Email"
+               autocomplete="email" required />
+        <input class="auth-input" type="password" id="signupPassword" placeholder="Password"
+               autocomplete="new-password" required />
+        <div class="auth-error" id="signupError"></div>
+        <button class="auth-submit" type="submit">Create Account</button>
+        <p class="auth-switch">
+          Already have an account?
+          <button type="button" class="auth-link" id="toLogin">Sign in</button>
+        </p>
+      </form>
+
+      <!-- Sign-in form -->
+      <form class="auth-form auth-form--hidden" id="loginForm" novalidate>
+        <input class="auth-input" type="email"    id="loginEmail"    placeholder="Email"
+               autocomplete="email" required />
+        <input class="auth-input" type="password" id="loginPassword" placeholder="Password"
+               autocomplete="current-password" required />
+        <div class="auth-error" id="loginError"></div>
+        <button class="auth-submit" type="submit">Sign In</button>
+        <p class="auth-switch">
+          Don't have an account?
+          <button type="button" class="auth-link" id="toSignup">Create one</button>
+        </p>
+      </form>
+
+    </div>
+  </div>
+  <!-- ══ End Auth Modal ══════════════════════════════════════ -->
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="background.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

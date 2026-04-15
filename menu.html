@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Afterglow Study — Menu</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Shared background -->
+  <canvas id="skyCanvas"></canvas>
+  <canvas id="cityCanvas"></canvas>
+  <div class="moon" aria-hidden="true"></div>
+
+  <!-- Sign-out button — top right -->
+  <button class="sign-out-btn" id="signOutBtn">Sign Out</button>
+
+  <!-- Main menu content -->
+  <div class="menu-wrap" id="menuWrap" style="opacity:0">
+    <h1 class="menu-title">Afterglow Study</h1>
+    <p class="menu-greeting" id="menuGreeting"></p>
+    <!-- Menu items will be added here in a future session -->
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="background.js"></script>
+  <script src="menu.js"></script>
+</body>
+</html>
