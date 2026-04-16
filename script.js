@@ -1,5 +1,5 @@
 /* ============================================================
-   AFTERGLOW STUDY — script.js  (title screen)
+   LUMINESCE STUDY — script.js  (title screen)
    ============================================================ */
 
 // ── Supabase auth ─────────────────────────────────────────────
@@ -135,15 +135,15 @@ window.addEventListener('resize', resizeTitleCanvas);
 const titleEl = document.getElementById('mainTitle');
 
 const LANGUAGES = [
-  { text: 'Afterglow Study',         dir: 'ltr', lang: 'en' },
-  { text: 'Estudio Resplandor',      dir: 'ltr', lang: 'es' },
-  { text: 'Étude du Crépuscule',     dir: 'ltr', lang: 'fr' },
-  { text: 'دراسة الشفق',            dir: 'rtl', lang: 'ar' },
-  { text: '余晖学习',                 dir: 'ltr', lang: 'zh' },
-  { text: 'Alacakaranlık Çalışması', dir: 'ltr', lang: 'tr' },
-  { text: '노을 공부',                dir: 'ltr', lang: 'ko' },
-  { text: 'Skemergloed Studie',      dir: 'ltr', lang: 'af' },
-  { text: '夕映えの学び',             dir: 'ltr', lang: 'ja' },
+  { text: 'Luminesce Study',         dir: 'ltr', lang: 'en' },
+  { text: 'Estudio Luminesce',       dir: 'ltr', lang: 'es' },
+  { text: 'Étude Luminesce',         dir: 'ltr', lang: 'fr' },
+  { text: 'دراسة لومينيس',           dir: 'rtl', lang: 'ar' },
+  { text: '流光学习',                  dir: 'ltr', lang: 'zh' },
+  { text: 'Luminesce Çalışması',     dir: 'ltr', lang: 'tr' },
+  { text: '빛나는 공부',               dir: 'ltr', lang: 'ko' },
+  { text: 'Luminesce Studie',        dir: 'ltr', lang: 'af' },
+  { text: '輝きの学び',               dir: 'ltr', lang: 'ja' },
 ];
 
 function easeSinInOut(t) {

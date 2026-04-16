@@ -1,5 +1,5 @@
 /* ============================================================
-   AFTERGLOW STUDY — background.js
+   LUMINESCE STUDY — background.js
    Shared sky + city canvas code.  Both index and menu load this.
    Call startBackground() after the DOM is ready.
    ============================================================ */

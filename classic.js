@@ -1,5 +1,5 @@
 /* ============================================================
-   AFTERGLOW STUDY — classic.js  (Classic study mode)
+   LUMINESCE STUDY — classic.js  (Classic study mode)
    ============================================================ */
 
 // ── Supabase auth gate ────────────────────────────────────────
@@ -171,58 +171,211 @@ document.getElementById('taskForm').addEventListener('submit', (e) => {
   input.focus();
 });
 
-// ── Music ─────────────────────────────────────────────────────
-// Royalty-free instrumental tracks via SoundHelix (CC BY-SA 3.0)
-// Swap these URLs for real lofi tracks whenever you like.
+// ── Music (Web Audio lofi synthesizer) ───────────────────────
 
-const TRACKS = [
-  { name: 'Café Lofi 1', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3' },
-  { name: 'Café Lofi 2', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3' },
-  { name: 'Café Lofi 3', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3' },
-  { name: 'Café Lofi 4', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-11.mp3' },
+const PRESETS = [
+  { name: 'Late Night Study', bpm: 75 },
+  { name: 'Rainy Café',       bpm: 68 },
+  { name: 'Cozy Bedroom',     bpm: 82 },
+  { name: 'Golden Hour',      bpm: 72 },
 ];
 
-let trackIndex = 0;
-const audio = document.getElementById('audioEl');
+// Jazz chord progressions: Cmaj7 → Am7 → Fmaj7 → G7
+const CHORD_SEQ = [
+  [60, 64, 67, 71],
+  [57, 60, 64, 67],
+  [53, 57, 60, 64],
+  [55, 59, 62, 65],
+];
+const BASS_SEQ = [60, 57, 53, 55];
 
-function loadTrack(idx, autoPlay = false) {
-  audio.src = TRACKS[idx].url;
-  document.getElementById('trackName').textContent = TRACKS[idx].name;
-  document.getElementById('btnPlayPause').innerHTML = '&#9654;';
-  if (autoPlay) {
-    audio.play().then(() => {
-      document.getElementById('btnPlayPause').innerHTML = '&#9646;&#9646;';
-    }).catch(() => {}); // autoplay may be blocked — fail silently
+const SWING        = 0.62;   // >0.5 swings the beat
+const LOOKAHEAD    = 0.10;   // seconds to schedule ahead
+const SCHED_MS     = 25;     // scheduler tick interval (ms)
+
+let presetIdx    = 0;
+let lofiCtx      = null;
+let masterGain   = null;
+let noiseBuffer  = null;
+let lofiPlaying  = false;
+let schedTimer   = null;
+let beatStep     = 0;
+let nextBeatTime = 0;
+
+function midi2hz(m) { return 440 * Math.pow(2, (m - 69) / 12); }
+
+function initAudio() {
+  if (lofiCtx) return;
+  lofiCtx    = new (window.AudioContext || window.webkitAudioContext)();
+  masterGain = lofiCtx.createGain();
+  masterGain.gain.value = 0.70;
+  const warmth = lofiCtx.createBiquadFilter();
+  warmth.type = 'lowpass';
+  warmth.frequency.value = 5500;
+  masterGain.connect(warmth);
+  warmth.connect(lofiCtx.destination);
+
+  // Shared noise buffer (2 s of white noise, reused for drums)
+  const nbLen = lofiCtx.sampleRate * 2;
+  noiseBuffer = lofiCtx.createBuffer(1, nbLen, lofiCtx.sampleRate);
+  const nd = noiseBuffer.getChannelData(0);
+  for (let i = 0; i < nbLen; i++) nd[i] = Math.random() * 2 - 1;
+
+  // Vinyl hiss + crackle
+  const vLen = lofiCtx.sampleRate * 4;
+  const vBuf = lofiCtx.createBuffer(1, vLen, lofiCtx.sampleRate);
+  const vd   = vBuf.getChannelData(0);
+  for (let i = 0; i < vLen; i++) {
+    vd[i]  = (Math.random() - 0.5) * 0.016;
+    if (Math.random() < 0.0007) vd[i] += (Math.random() - 0.5) * 0.85;
   }
+  const vSrc = lofiCtx.createBufferSource();
+  vSrc.buffer = vBuf; vSrc.loop = true;
+  const vBp = lofiCtx.createBiquadFilter();
+  vBp.type = 'bandpass'; vBp.frequency.value = 2800; vBp.Q.value = 0.6;
+  const vG = lofiCtx.createGain(); vG.gain.value = 0.20;
+  vSrc.connect(vBp); vBp.connect(vG); vG.connect(masterGain);
+  vSrc.start();
 }
+
+// ── Drum voices ───────────────────────────────────────────────
+function kick(t) {
+  const o = lofiCtx.createOscillator();
+  const g = lofiCtx.createGain();
+  o.connect(g); g.connect(masterGain);
+  o.frequency.setValueAtTime(140, t);
+  o.frequency.exponentialRampToValueAtTime(38, t + 0.10);
+  g.gain.setValueAtTime(0.88, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + 0.38);
+  o.start(t); o.stop(t + 0.42);
+}
+
+function snare(t) {
+  const src = lofiCtx.createBufferSource(); src.buffer = noiseBuffer;
+  const hp  = lofiCtx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 1800;
+  const g   = lofiCtx.createGain();
+  src.connect(hp); hp.connect(g); g.connect(masterGain);
+  g.gain.setValueAtTime(0.46, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + 0.19);
+  src.start(t); src.stop(t + 0.21);
+
+  const o = lofiCtx.createOscillator(); const g2 = lofiCtx.createGain();
+  o.frequency.value = 195; o.connect(g2); g2.connect(masterGain);
+  g2.gain.setValueAtTime(0.20, t);
+  g2.gain.exponentialRampToValueAtTime(0.001, t + 0.09);
+  o.start(t); o.stop(t + 0.11);
+}
+
+function hat(t, open = false) {
+  const src = lofiCtx.createBufferSource(); src.buffer = noiseBuffer;
+  const bp  = lofiCtx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 9000; bp.Q.value = 0.9;
+  const g   = lofiCtx.createGain();
+  src.connect(bp); bp.connect(g); g.connect(masterGain);
+  const dur = open ? 0.09 : 0.04;
+  g.gain.setValueAtTime(open ? 0.14 : 0.09, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  src.start(t); src.stop(t + dur + 0.01);
+}
+
+// ── Harmonic voices ───────────────────────────────────────────
+function pad(t, notes, dur) {
+  notes.forEach((m, i) => {
+    const hz = midi2hz(m - 12);
+    const o1 = lofiCtx.createOscillator(); o1.type = 'triangle'; o1.frequency.value = hz;
+    const o2 = lofiCtx.createOscillator(); o2.type = 'triangle'; o2.frequency.value = hz * 1.005;
+    const lp = lofiCtx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1400;
+    const g  = lofiCtx.createGain();
+    o1.connect(lp); o2.connect(lp); lp.connect(g); g.connect(masterGain);
+    const del = i * 0.04;
+    const vol = 0.048;
+    g.gain.setValueAtTime(0, t + del);
+    g.gain.linearRampToValueAtTime(vol, t + del + 0.35);
+    g.gain.setValueAtTime(vol, t + dur - 0.55);
+    g.gain.linearRampToValueAtTime(0, t + dur);
+    o1.start(t + del); o1.stop(t + dur + 0.05);
+    o2.start(t + del); o2.stop(t + dur + 0.05);
+  });
+}
+
+function bass(t, midi, dur) {
+  const hz = midi2hz(midi - 24);
+  const o  = lofiCtx.createOscillator(); o.type = 'triangle'; o.frequency.value = hz;
+  const lp = lofiCtx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 360;
+  const g  = lofiCtx.createGain();
+  o.connect(lp); lp.connect(g); g.connect(masterGain);
+  g.gain.setValueAtTime(0.52, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  o.start(t); o.stop(t + dur + 0.05);
+}
+
+// ── Beat scheduler ────────────────────────────────────────────
+function playStep(t) {
+  const s8    = beatStep % 8;   // 0-7 within bar (8th-note steps)
+  const barN  = Math.floor(beatStep / 8) % CHORD_SEQ.length;
+  const bpm   = PRESETS[presetIdx].bpm;
+  const beat  = 60 / bpm;
+
+  if (s8 === 0 || s8 === 4) kick(t);
+  if (s8 === 2 || s8 === 6) snare(t);
+  hat(t, s8 === 3);           // open hat just before snare on beat 2
+
+  if (s8 === 0) {
+    pad(t, CHORD_SEQ[barN], beat * 7.6);
+    bass(t, BASS_SEQ[barN], beat * 1.4);
+  }
+  if (s8 === 4) bass(t, BASS_SEQ[barN], beat * 0.85);
+}
+
+function scheduler() {
+  while (nextBeatTime < lofiCtx.currentTime + LOOKAHEAD) {
+    playStep(nextBeatTime);
+    const bpm    = PRESETS[presetIdx].bpm;
+    const beat   = 60 / bpm;
+    const even   = (beatStep % 2 === 0);
+    nextBeatTime += even ? beat * SWING : beat * (1 - SWING);
+    beatStep++;
+  }
+  if (lofiPlaying) schedTimer = setTimeout(scheduler, SCHED_MS);
+}
+
+function startLofi() {
+  initAudio();
+  if (lofiCtx.state === 'suspended') lofiCtx.resume();
+  if (lofiPlaying) return;
+  lofiPlaying  = true;
+  beatStep     = 0;
+  nextBeatTime = lofiCtx.currentTime + 0.05;
+  scheduler();
+}
+
+function stopLofi() {
+  lofiPlaying = false;
+  clearTimeout(schedTimer);
+  if (lofiCtx) lofiCtx.suspend();
+}
+
+// ── Music panel UI ────────────────────────────────────────────
+document.getElementById('trackName').textContent = PRESETS[presetIdx].name;
 
 document.getElementById('btnPlayPause').addEventListener('click', () => {
   const btn = document.getElementById('btnPlayPause');
-  if (!audio.src) { loadTrack(trackIndex, true); return; }
-
-  if (audio.paused) {
-    audio.play();
-    btn.innerHTML = '&#9646;&#9646;';
-  } else {
-    audio.pause();
+  if (lofiPlaying) {
+    stopLofi();
     btn.innerHTML = '&#9654;';
+  } else {
+    startLofi();
+    btn.innerHTML = '&#9646;&#9646;';
   }
 });
 
 document.getElementById('btnPrev').addEventListener('click', () => {
-  trackIndex = (trackIndex - 1 + TRACKS.length) % TRACKS.length;
-  loadTrack(trackIndex, !audio.paused);
+  presetIdx = (presetIdx - 1 + PRESETS.length) % PRESETS.length;
+  document.getElementById('trackName').textContent = PRESETS[presetIdx].name;
+  if (lofiPlaying) { stopLofi(); startLofi(); }
 });
 
 document.getElementById('btnNext').addEventListener('click', () => {
-  trackIndex = (trackIndex + 1) % TRACKS.length;
-  loadTrack(trackIndex, !audio.paused);
+  presetIdx = (presetIdx + 1) % PRESETS.length;
+  document.getElementById('trackName').textContent = PRESETS[presetIdx].name;
+  if (lofiPlaying) { stopLofi(); startLofi(); }
 });
-
-audio.addEventListener('ended', () => {
-  trackIndex = (trackIndex + 1) % TRACKS.length;
-  loadTrack(trackIndex, true);
-});
-
-// Set first track name without loading audio (respects autoplay policy)
-document.getElementById('trackName').textContent = TRACKS[0].name;
