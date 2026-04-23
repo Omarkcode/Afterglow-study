@@ -178,6 +178,7 @@ const PRESETS = [
   { name: 'Rainy Café',       url: 'https://cdn.pixabay.com/audio/2022/12/12/audio_e17505bad5.mp3' },
   { name: 'Cozy Bedroom',     url: 'https://cdn.pixabay.com/audio/2024/11/03/audio_f8553f33ce.mp3' },
   { name: 'Golden Hour',      url: 'https://cdn.pixabay.com/audio/2025/05/19/audio_df39b1bba0.mp3' },
+  { name: 'Intergalactic Trip', url: 'https://cdn.pixabay.com/audio/2026/04/11/audio_598980b38d.mp3' },
 ];
 
 let presetIdx = 0;
