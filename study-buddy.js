@@ -139,7 +139,8 @@ When a student asks you to create a quiz or multiple-choice questions, use:
     {
       "question": "question text",
       "options": ["Option A", "Option B", "Option C", "Option D"],
-      "correct": 0
+      "correct": 0,
+      "unit": "Unit 4.1 — Topic Name"
     }
   ]
 }
@@ -148,6 +149,7 @@ When a student asks you to create a quiz or multiple-choice questions, use:
 Rules:
 - "correct" is the zero-based index of the correct answer
 - Use 4 options for regular questions; use exactly 2 options ["True", "False"] for true/false questions
+- Always include a "unit" field on every test question — use the real curriculum unit number and topic name if known (e.g. "Unit 3.2 — Cell Division", "Chapter 7 — The French Revolution"). If the unit is unknown, make a reasonable short label like "Topic: Photosynthesis"
 - Aim for 8–12 items in flashcard sets, 6–8 in quizzes
 - You may write a brief intro sentence before the panel block and a closing line after it
 - When editing an existing panel, output the full improved version in the same format

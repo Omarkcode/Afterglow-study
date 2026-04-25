@@ -244,7 +244,12 @@ function renderResults() {
     ? `<div class="results-perfect">🌟 Perfect score — outstanding work!</div>`
     : `<div class="results-missed">
         <div class="results-missed-title">Review these</div>
-        ${missed.map(q => `<div class="results-missed-item">${escKf(q.question)}</div>`).join('')}
+        ${missed.map(q => `
+          <div class="results-missed-item">
+            <div class="results-missed-question">${escKf(q.question)}</div>
+            ${q.unit ? `<div class="results-missed-unit">📖 Study: ${escKf(q.unit)}</div>` : ''}
+          </div>
+        `).join('')}
       </div>`;
 
   modal.innerHTML = `
