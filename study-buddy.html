@@ -80,8 +80,15 @@
       <!-- Messages -->
       <div class="sb-messages" id="sbMessages"></div>
 
+      <!-- Edit chip — shown when a panel is dragged in for editing -->
+      <div class="sb-edit-chip" id="sbEditChip" hidden>
+        <span class="sb-edit-chip-label">Editing:</span>
+        <span class="sb-edit-chip-name" id="sbEditChipName"></span>
+        <button class="sb-edit-chip-close" id="sbEditChipClose" aria-label="Cancel edit">✕</button>
+      </div>
+
       <!-- Input bar -->
-      <div class="sb-input-bar">
+      <div class="sb-input-bar" id="sbInputBar">
         <textarea
           class="sb-input"
           id="sbInput"

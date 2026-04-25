@@ -24,15 +24,39 @@ document.getElementById('btnExit').addEventListener('click', () => {
   window.location.href = 'menu.html';
 });
 
+// ── Edit panel state ──────────────────────────────────────────
+// Set when user drags a KF card (or clicks Edit) into the chat.
+// Cleared after the message is sent.
+
+let _editPanel = null;
+
+function setEditPanel(panel) {
+  _editPanel = panel;
+  const chip  = document.getElementById('sbEditChip');
+  const name  = document.getElementById('sbEditChipName');
+  const icon  = panel.type === 'flashcard' ? '🃏' : '📝';
+  name.textContent = `${icon} ${panel.name}`;
+  chip.hidden = false;
+  const inputEl = document.getElementById('sbInput');
+  inputEl.placeholder = 'Tell Study Buddy how to edit this panel…';
+  inputEl.focus();
+}
+
+function clearEditPanel() {
+  _editPanel = null;
+  document.getElementById('sbEditChip').hidden = true;
+  document.getElementById('sbInput').placeholder = 'Ask Study Buddy anything… (Shift+Enter for new line)';
+}
+
+document.getElementById('sbEditChipClose').addEventListener('click', clearEditPanel);
+
 // ── Knowledge Finder panel ────────────────────────────────────
 
 window.KF_EDIT_MODE = true;
 
+// Edit button in KF panel triggers the drag-drop same flow
 window.onKnowledgePanelEdit = (panel) => {
-  const input = document.getElementById('sbInput');
-  input.value = `Please update and improve this knowledge panel:\n[KNOWLEDGE_PANEL]\n${JSON.stringify(panel, null, 2)}\n[/KNOWLEDGE_PANEL]`;
-  autoResizeInput(input);
-  input.focus();
+  setEditPanel(panel);
   document.getElementById('kfPanel').hidden = true;
   document.getElementById('btnKF').classList.remove('sb-btn--active');
 };
@@ -47,6 +71,47 @@ document.getElementById('btnKF').addEventListener('click', () => {
 
   if (open) renderKnowledgeFinder(document.getElementById('kfList'));
 });
+
+// ── Drag-and-drop: panel card → chat input ────────────────────
+
+const inputBarEl = document.getElementById('sbInputBar');
+
+inputBarEl.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'copy';
+  inputBarEl.classList.add('drag-over');
+});
+
+inputBarEl.addEventListener('dragleave', (e) => {
+  if (!inputBarEl.contains(e.relatedTarget)) {
+    inputBarEl.classList.remove('drag-over');
+  }
+});
+
+// Also accept drops anywhere on the messages area for convenience
+document.getElementById('sbMessages').addEventListener('dragover', (e) => {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'copy';
+  inputBarEl.classList.add('drag-over');
+});
+
+document.getElementById('sbMessages').addEventListener('dragleave', (e) => {
+  if (!document.querySelector('.sb-chat-wrap').contains(e.relatedTarget)) {
+    inputBarEl.classList.remove('drag-over');
+  }
+});
+
+function handlePanelDrop(e) {
+  e.preventDefault();
+  inputBarEl.classList.remove('drag-over');
+  try {
+    const panel = JSON.parse(e.dataTransfer.getData('application/json'));
+    if (panel && panel.id) setEditPanel(panel);
+  } catch { /* not a panel drag */ }
+}
+
+inputBarEl.addEventListener('drop', handlePanelDrop);
+document.getElementById('sbMessages').addEventListener('drop', handlePanelDrop);
 
 // ── Groq system prompt ────────────────────────────────────────
 
@@ -85,7 +150,7 @@ Rules:
 - Use 4 options for regular questions; use exactly 2 options ["True", "False"] for true/false questions
 - Aim for 8–12 items in flashcard sets, 6–8 in quizzes
 - You may write a brief intro sentence before the panel block and a closing line after it
-- If the student pastes an existing panel for editing, output an improved version in the same format
+- When editing an existing panel, output the full improved version in the same format
 
 Keep responses concise, warm, and encouraging. If you don't know something, say so honestly.`;
 
@@ -106,21 +171,15 @@ function escHtml(s) {
 function renderMarkdown(text) {
   if (!text) return '';
   let s = escHtml(text);
-
-  // Bold, italic, inline code
   s = s.replace(/\*\*([\s\S]*?)\*\*/g, '<strong>$1</strong>');
   s = s.replace(/\*([\s\S]*?)\*/g,     '<em>$1</em>');
   s = s.replace(/`([^`\n]+)`/g,        '<code>$1</code>');
-
-  // Paragraphs
   const parts = s.split(/\n\n+/);
   return parts.map(p => '<p>' + p.replace(/\n/g, '<br>') + '</p>').join('');
 }
 
 function cleanForDisplay(rawText) {
-  // Remove complete panel blocks
   let s = rawText.replace(/\[KNOWLEDGE_PANEL\][\s\S]*?\[\/KNOWLEDGE_PANEL\]/g, '');
-  // Remove any partial/in-progress panel block still streaming
   s = s.replace(/\[KNOWLEDGE_PANEL\][\s\S]*/g, '');
   return s.trim();
 }
@@ -160,13 +219,12 @@ function updateBubble(msgEl, rawText, typing) {
     cursor.className = 'typing-cursor';
     bubble.appendChild(cursor);
   }
-  const msgsEl = document.getElementById('sbMessages');
-  msgsEl.scrollTop = msgsEl.scrollHeight;
+  document.getElementById('sbMessages').scrollTop = document.getElementById('sbMessages').scrollHeight;
 }
 
-// ── Extract & save knowledge panels ──────────────────────────
+// ── Extract & save/update knowledge panels ────────────────────
 
-async function extractAndSavePanels(fullText, msgEl) {
+async function extractAndSavePanels(fullText, msgEl, editingPanel) {
   const regex = /\[KNOWLEDGE_PANEL\]([\s\S]*?)\[\/KNOWLEDGE_PANEL\]/g;
   let match;
   while ((match = regex.exec(fullText)) !== null) {
@@ -177,28 +235,31 @@ async function extractAndSavePanels(fullText, msgEl) {
       continue;
     }
 
-    const saved = await saveKnowledgePanel(panelData);
+    let saved;
+    if (editingPanel) {
+      saved = await updateKnowledgePanel(editingPanel.id, panelData);
+    } else {
+      saved = await saveKnowledgePanel(panelData);
+    }
+
     const inner = msgEl.querySelector('.msg-inner');
     const badge = document.createElement('div');
     badge.className = 'msg-panel-saved';
     badge.textContent = saved
-      ? `✓ "${panelData.name}" saved to Knowledge Finder`
+      ? (editingPanel ? `✓ "${panelData.name}" updated in Knowledge Finder` : `✓ "${panelData.name}" saved to Knowledge Finder`)
       : `⚠ Could not save "${panelData.name}"`;
     inner.appendChild(badge);
   }
 
-  // Refresh KF list if panel is open
   const kfPanel = document.getElementById('kfPanel');
   if (!kfPanel.hidden) renderKnowledgeFinder(document.getElementById('kfList'));
 }
 
 // ── Groq streaming request ────────────────────────────────────
 
-async function sendToGroq(userText) {
+async function sendToGroq(userDisplayText, apiUserText, editingPanel) {
   if (isStreaming) return;
-
-  const trimmed = userText.trim();
-  if (!trimmed) return;
+  if (!userDisplayText.trim()) return;
 
   if (typeof GROQ_API_KEY === 'undefined' || GROQ_API_KEY === 'your-groq-api-key-here') {
     appendMessage('ai', '⚠ No Groq API key found. Please create a **config.js** file with your key — see **config.example.js** for the format.');
@@ -208,8 +269,11 @@ async function sendToGroq(userText) {
   isStreaming = true;
   setSendDisabled(true);
 
-  conversationHistory.push({ role: 'user', content: trimmed });
-  appendMessage('user', trimmed);
+  // Show the user's readable message in chat
+  appendMessage('user', userDisplayText);
+
+  // Store the full API message (which may include panel JSON) in history
+  conversationHistory.push({ role: 'user', content: apiUserText });
 
   const aiMsgEl = appendMessage('ai', '');
   updateBubble(aiMsgEl, '', true);
@@ -224,10 +288,10 @@ async function sendToGroq(userText) {
         'Authorization': `Bearer ${GROQ_API_KEY}`
       },
       body: JSON.stringify({
-        model:      'llama-3.3-70b-versatile',
-        messages:   [{ role: 'system', content: SYSTEM_PROMPT }, ...conversationHistory],
-        stream:     true,
-        max_tokens: 2048,
+        model:       'llama-3.3-70b-versatile',
+        messages:    [{ role: 'system', content: SYSTEM_PROMPT }, ...conversationHistory],
+        stream:      true,
+        max_tokens:  2048,
         temperature: 0.7
       })
     });
@@ -254,20 +318,18 @@ async function sendToGroq(userText) {
           const delta = json.choices?.[0]?.delta?.content || '';
           fullResponse += delta;
           updateBubble(aiMsgEl, fullResponse, true);
-        } catch { /* partial JSON chunk, skip */ }
+        } catch { /* partial chunk */ }
       }
     }
 
-    // Final render without cursor
     updateBubble(aiMsgEl, fullResponse, false);
     conversationHistory.push({ role: 'assistant', content: fullResponse });
 
-    // Trim history to last 24 messages to respect token limits
     if (conversationHistory.length > 24) {
       conversationHistory = conversationHistory.slice(conversationHistory.length - 24);
     }
 
-    await extractAndSavePanels(fullResponse, aiMsgEl);
+    await extractAndSavePanels(fullResponse, aiMsgEl, editingPanel);
 
   } catch (err) {
     updateBubble(aiMsgEl, `❌ Something went wrong: ${err.message}`, false);
@@ -305,20 +367,30 @@ inputEl.addEventListener('keydown', (e) => {
 document.getElementById('sbSend').addEventListener('click', handleSend);
 
 function handleSend() {
-  const text = inputEl.value;
-  if (!text.trim() || isStreaming) return;
+  const text = inputEl.value.trim();
+  if (!text || isStreaming) return;
+
+  const editingPanel = _editPanel;
+  let apiText        = text;
+
+  if (editingPanel) {
+    // Attach the panel JSON to the API message only — not shown in chat
+    apiText = `Please edit this knowledge panel as follows: ${text}\n\nCurrent panel:\n[KNOWLEDGE_PANEL]\n${JSON.stringify(editingPanel, null, 2)}\n[/KNOWLEDGE_PANEL]`;
+    clearEditPanel();
+  }
+
   inputEl.value = '';
   inputEl.style.height = 'auto';
-  sendToGroq(text);
+
+  sendToGroq(text, apiText, editingPanel);
 }
 
 // ── Welcome message ───────────────────────────────────────────
 
 (function showWelcome() {
-  const msgs = document.getElementById('sbMessages');
   const welcome = appendMessage('ai', '');
   welcome.querySelector('.msg-bubble').innerHTML = renderMarkdown(
-    `Hey there! I'm your Study Buddy 👋\n\nI can help you **understand any topic**, **make flashcards**, or **quiz you** on your material. Just tell me what you're studying and I'll get to work.\n\nFor example, try:\n- *"Make 10 flashcards on the French Revolution"*\n- *"Quiz me on photosynthesis"*\n- *"Explain quantum entanglement simply"*`
+    `Hey there! I'm your Study Buddy 👋\n\nI can help you **understand any topic**, **make flashcards**, or **quiz you** on your material. Just tell me what you're studying and I'll get to work.\n\nFor example, try:\n- *"Make 10 flashcards on the French Revolution"*\n- *"Quiz me on photosynthesis"*\n- *"Explain quantum entanglement simply"*\n\nTo edit a saved panel, **drag it from the Knowledge Finder into the chat** and tell me what to change.`
   );
-  msgs.scrollTop = 0;
+  document.getElementById('sbMessages').scrollTop = 0;
 })();

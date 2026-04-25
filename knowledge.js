@@ -60,17 +60,25 @@ async function renderKnowledgeFinder(listEl) {
 
     const card = document.createElement('div');
     card.className = 'kf-card';
+    card.draggable = true;
     card.innerHTML = `
       <div class="kf-card-top">
         <span class="kf-card-icon">${icon}</span>
         <span class="kf-card-name">${escKf(panel.name)}</span>
       </div>
-      <div class="kf-card-meta">${label}</div>
+      <div class="kf-card-meta">${label}${window.KF_EDIT_MODE ? ' · drag to chat to edit' : ''}</div>
       <div class="kf-card-btns">
         <button class="kf-btn kf-btn--play" data-id="${panel.id}">▶ Play</button>
         ${window.KF_EDIT_MODE ? `<button class="kf-btn kf-btn--edit" data-id="${panel.id}">✦ Edit</button>` : ''}
       </div>
     `;
+
+    card.addEventListener('dragstart', (e) => {
+      e.dataTransfer.setData('application/json', JSON.stringify(panel));
+      e.dataTransfer.effectAllowed = 'copy';
+      card.style.opacity = '0.45';
+    });
+    card.addEventListener('dragend', () => { card.style.opacity = ''; });
 
     card.querySelector('.kf-btn--play').addEventListener('click', () => openPlayer(panel));
     if (window.KF_EDIT_MODE) {
@@ -269,7 +277,7 @@ function renderResults() {
   });
 }
 
-// ── Save panel to Supabase (called from study-buddy.js) ───────
+// ── Save / update panels (called from study-buddy.js) ─────────
 
 async function saveKnowledgePanel(panelData) {
   const { data: { user } } = await _kbSb.auth.getUser();
@@ -281,5 +289,19 @@ async function saveKnowledgePanel(panelData) {
     questions: panelData.questions,
   }).select().single();
   if (error) { console.error('Save panel error:', error); return null; }
+  return data;
+}
+
+async function updateKnowledgePanel(id, panelData) {
+  const { data: { user } } = await _kbSb.auth.getUser();
+  if (!user) return null;
+  const { data, error } = await _kbSb
+    .from('knowledge_panels')
+    .update({ name: panelData.name, type: panelData.type, questions: panelData.questions })
+    .eq('id', id)
+    .eq('user_id', user.id)
+    .select()
+    .single();
+  if (error) { console.error('Update panel error:', error); return null; }
   return data;
 }
