@@ -252,6 +252,55 @@
 }
 .sb-edit-chip-close:hover { color: rgba(255, 150, 120, 0.80); }
 
+/* ── File chip ───────────────────────────────────────────────── */
+.sb-file-chip {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 12px;
+  background: rgba(100, 140, 255, 0.09);
+  border: 1px solid rgba(100, 140, 255, 0.22);
+  border-radius: 10px;
+  font-size: 0.78rem;
+  flex-shrink: 0;
+  animation: msgFadeIn 0.2s ease;
+}
+
+.sb-file-chip[hidden] { display: none; }
+
+.sb-file-chip-name {
+  color: rgba(180, 210, 255, 0.88);
+  font-weight: 500;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Attach button ───────────────────────────────────────────── */
+.sb-attach {
+  width: 44px;
+  height: 44px;
+  border-radius: 13px;
+  border: 1px solid rgba(80, 120, 230, 0.22);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(180, 200, 255, 0.45);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.sb-attach:hover {
+  background: rgba(80, 120, 230, 0.12);
+  border-color: rgba(100, 150, 255, 0.35);
+  color: rgba(210, 230, 255, 0.80);
+}
+
+.sb-attach svg { width: 17px; height: 17px; }
+
 /* ── Input bar ───────────────────────────────────────────────── */
 .sb-input-bar {
   display: flex;

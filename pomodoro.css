@@ -103,8 +103,11 @@
   text-align: center;
 }
 
-/* ── SESSION INTENTION PANEL ─────────────────────────────────── */
-.panel--intention { min-width: 260px; }
+/* ── INTENTION SECTION (embedded in Pomodoro panel) ─────────── */
+.pomo-intention {
+  border-top: 1px solid rgba(80, 120, 230, 0.10);
+  margin: 4px 2px 0;
+}
 
 .intention-state {
   padding: 14px 16px 16px;
@@ -137,9 +140,9 @@
 
 .intention-display {
   font-family: 'Dancing Script', cursive;
-  font-size: 1.1rem;
-  color: rgba(244, 234, 216, 0.75);
-  line-height: 1.55;
+  font-size: 1.65rem;
+  color: rgba(255, 215, 140, 0.92);
+  line-height: 1.45;
   text-align: center;
   padding: 10px 4px;
 }

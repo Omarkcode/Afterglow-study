@@ -90,8 +90,22 @@
         <button class="sb-edit-chip-close" id="sbEditChipClose" aria-label="Cancel edit">✕</button>
       </div>
 
+      <!-- File chip — shown when a file is attached -->
+      <div class="sb-file-chip" id="sbFileChip" hidden>
+        <span>📎</span>
+        <span class="sb-file-chip-name" id="sbFileChipName"></span>
+        <button class="sb-edit-chip-close" id="sbFileChipClose" aria-label="Remove file">✕</button>
+      </div>
+
       <!-- Input bar -->
       <div class="sb-input-bar" id="sbInputBar">
+        <input type="file" id="sbFileInput" accept="image/*,.txt,.md,.csv,.json" hidden>
+        <button class="sb-attach" id="sbAttach" aria-label="Attach file" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+          </svg>
+        </button>
         <textarea
           class="sb-input"
           id="sbInput"

@@ -25,10 +25,44 @@ document.getElementById('btnExit').addEventListener('click', () => {
 });
 
 // ── Edit panel state ──────────────────────────────────────────
-// Set when user drags a KF card (or clicks Edit) into the chat.
-// Cleared after the message is sent.
 
 let _editPanel = null;
+
+// ── File attachment state ─────────────────────────────────────
+
+let _attachedFile = null; // { type: 'image'|'text', name, data, mimeType }
+
+function setAttachedFile(file) {
+  _attachedFile = file;
+  document.getElementById('sbFileChipName').textContent = file.name;
+  document.getElementById('sbFileChip').hidden = false;
+}
+
+function clearAttachedFile() {
+  _attachedFile = null;
+  document.getElementById('sbFileChip').hidden = true;
+  document.getElementById('sbFileInput').value = '';
+}
+
+document.getElementById('sbAttach').addEventListener('click', () => {
+  document.getElementById('sbFileInput').click();
+});
+
+document.getElementById('sbFileChipClose').addEventListener('click', clearAttachedFile);
+
+document.getElementById('sbFileInput').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  if (file.type.startsWith('image/')) {
+    reader.onload = (ev) => setAttachedFile({ type: 'image', name: file.name, data: ev.target.result, mimeType: file.type });
+    reader.readAsDataURL(file);
+  } else {
+    reader.onload = (ev) => setAttachedFile({ type: 'text', name: file.name, data: ev.target.result });
+    reader.readAsText(file);
+  }
+});
 
 function setEditPanel(panel) {
   _editPanel = panel;
@@ -259,9 +293,8 @@ async function extractAndSavePanels(fullText, msgEl, editingPanel) {
 
 // ── Groq streaming request ────────────────────────────────────
 
-async function sendToGroq(userDisplayText, apiUserText, editingPanel) {
+async function sendToGroq(userDisplayText, apiUserText, editingPanel, attachment) {
   if (isStreaming) return;
-  if (!userDisplayText.trim()) return;
 
   if (typeof GROQ_API_KEY === 'undefined' || GROQ_API_KEY === 'your-groq-api-key-here') {
     appendMessage('ai', '⚠ No Groq API key found. Please create a **config.js** file with your key — see **config.example.js** for the format.');
@@ -271,11 +304,37 @@ async function sendToGroq(userDisplayText, apiUserText, editingPanel) {
   isStreaming = true;
   setSendDisabled(true);
 
-  // Show the user's readable message in chat
-  appendMessage('user', userDisplayText);
+  // Show user message, with filename appended if file attached
+  const displayText = attachment
+    ? (userDisplayText + `\n\n📎 *${attachment.name}*`)
+    : userDisplayText;
+  appendMessage('user', displayText);
 
-  // Store the full API message (which may include panel JSON) in history
-  conversationHistory.push({ role: 'user', content: apiUserText });
+  // Build API messages and pick model
+  let model = 'llama-3.3-70b-versatile';
+  let apiMessages;
+
+  if (attachment?.type === 'image') {
+    model = 'llama-3.2-11b-vision-preview';
+    // Vision message — send alongside prior history
+    const imageMsg = {
+      role: 'user',
+      content: [
+        { type: 'image_url', image_url: { url: attachment.data } },
+        { type: 'text', text: apiUserText }
+      ]
+    };
+    apiMessages = [{ role: 'system', content: SYSTEM_PROMPT }, ...conversationHistory, imageMsg];
+    // Add a text-only summary to history for follow-up context
+    conversationHistory.push({ role: 'user', content: `[Attached image: ${attachment.name}] ${apiUserText}` });
+  } else if (attachment?.type === 'text') {
+    const combined = `[Attached file: ${attachment.name}]\n\n${attachment.data}\n\n---\n\n${apiUserText}`;
+    conversationHistory.push({ role: 'user', content: combined });
+    apiMessages = [{ role: 'system', content: SYSTEM_PROMPT }, ...conversationHistory];
+  } else {
+    conversationHistory.push({ role: 'user', content: apiUserText });
+    apiMessages = [{ role: 'system', content: SYSTEM_PROMPT }, ...conversationHistory];
+  }
 
   const aiMsgEl = appendMessage('ai', '');
   updateBubble(aiMsgEl, '', true);
@@ -290,8 +349,8 @@ async function sendToGroq(userDisplayText, apiUserText, editingPanel) {
         'Authorization': `Bearer ${GROQ_API_KEY}`
       },
       body: JSON.stringify({
-        model:       'llama-3.3-70b-versatile',
-        messages:    [{ role: 'system', content: SYSTEM_PROMPT }, ...conversationHistory],
+        model,
+        messages:    apiMessages,
         stream:      true,
         max_tokens:  2048,
         temperature: 0.7
@@ -370,21 +429,24 @@ document.getElementById('sbSend').addEventListener('click', handleSend);
 
 function handleSend() {
   const text = inputEl.value.trim();
-  if (!text || isStreaming) return;
+  if ((!text && !_attachedFile) || isStreaming) return;
 
   const editingPanel = _editPanel;
-  let apiText        = text;
+  const attachment   = _attachedFile;
+  const userText     = text || `Please analyse this file and help me study it.`;
+  let apiText        = userText;
 
   if (editingPanel) {
-    // Attach the panel JSON to the API message only — not shown in chat
-    apiText = `Please edit this knowledge panel as follows: ${text}\n\nCurrent panel:\n[KNOWLEDGE_PANEL]\n${JSON.stringify(editingPanel, null, 2)}\n[/KNOWLEDGE_PANEL]`;
+    apiText = `Please edit this knowledge panel as follows: ${userText}\n\nCurrent panel:\n[KNOWLEDGE_PANEL]\n${JSON.stringify(editingPanel, null, 2)}\n[/KNOWLEDGE_PANEL]`;
     clearEditPanel();
   }
+
+  if (attachment) clearAttachedFile();
 
   inputEl.value = '';
   inputEl.style.height = 'auto';
 
-  sendToGroq(text, apiText, editingPanel);
+  sendToGroq(userText, apiText, editingPanel, attachment);
 }
 
 // ── Welcome message ───────────────────────────────────────────
@@ -392,7 +454,7 @@ function handleSend() {
 (function showWelcome() {
   const welcome = appendMessage('ai', '');
   welcome.querySelector('.msg-bubble').innerHTML = renderMarkdown(
-    `Hey there! I'm your Study Buddy 👋\n\nI can help you **understand any topic**, **make flashcards**, or **quiz you** on your material. Just tell me what you're studying and I'll get to work.\n\nFor example, try:\n- *"Make 10 flashcards on the French Revolution"*\n- *"Quiz me on photosynthesis"*\n- *"Explain quantum entanglement simply"*\n\nTo edit a saved panel, **drag it from the Knowledge Finder into the chat** and tell me what to change.`
+    `Hey there! I'm your Study Buddy 👋\n\nI can help you **understand any topic**, **make flashcards**, or **quiz you** on your material. Just tell me what you're studying and I'll get to work.\n\nFor example, try:\n- *"Make 10 flashcards on the French Revolution"*\n- *"Quiz me on photosynthesis"*\n- *"Explain quantum entanglement simply"*\n\n📎 You can also **attach an image or text file** of your notes — I'll turn it into a flashcard set or quiz of your choice.\n\nTo edit a saved panel, **drag it from the Knowledge Finder into the chat** and tell me what to change.`
   );
   document.getElementById('sbMessages').scrollTop = 0;
 })();

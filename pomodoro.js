@@ -40,8 +40,6 @@ document.getElementById('btnTasks').addEventListener('click',     () => togglePa
 document.getElementById('btnMusic').addEventListener('click',     () => togglePanel('panelMusic',       'btnMusic'));
 document.getElementById('btnNotes').addEventListener('click',     () => togglePanel('panelNotes',       'btnNotes'));
 document.getElementById('btnDeadline').addEventListener('click',  () => togglePanel('panelDeadline',    'btnDeadline'));
-document.getElementById('btnIntention').addEventListener('click', () => togglePanel('panelIntention',   'btnIntention'));
-
 document.getElementById('btnKF').addEventListener('click', () => {
   const panel = document.getElementById('kfPanel');
   const open  = panel.hidden;
@@ -177,6 +175,16 @@ document.getElementById('btnPomoStart').addEventListener('click', () => {
     return;
   }
 
+  // Lock intention at start of study phase
+  if (pomoPhase === 'study') {
+    const text = document.getElementById('intentionText').value.trim();
+    if (text) {
+      document.getElementById('intentionDisplay').textContent = text;
+      localStorage.setItem('luminesce_intention', text);
+      setIntentionState('locked');
+    }
+  }
+
   pomoRunning = true;
   btn.textContent = 'Pause';
 
@@ -190,9 +198,10 @@ document.getElementById('btnPomoStart').addEventListener('click', () => {
         setPomoPhase('break');
         pomoSecsLeft = getBreakTime();
         renderPomoTimers();
+        showIntentionReview(); // show review during break
       } else {
         incrementTracker();
-        triggerIntentionReview();
+        setIntentionState('input'); // reset for next session
         setPomoPhase('study');
         pomoSecsLeft = getStudyTime();
         renderPomoTimers();
@@ -205,6 +214,7 @@ document.getElementById('btnPomoReset').addEventListener('click', () => {
   clearInterval(pomoInterval);
   pomoRunning = false;
   document.getElementById('btnPomoStart').textContent = 'Start';
+  setIntentionState('input');
   setPomoPhase('study');
   pomoSecsLeft = getStudyTime();
   renderPomoTimers();
@@ -482,20 +492,11 @@ function setIntentionState(state) {
   document.getElementById('intentionReview').hidden = state !== 'review';
 }
 
-function triggerIntentionReview() {
+function showIntentionReview() {
   const text = document.getElementById('intentionText').value.trim();
-
-  // Pause the pomodoro so the next session doesn't start mid-review
-  clearInterval(pomoInterval);
-  pomoRunning = false;
-  document.getElementById('btnPomoStart').textContent = 'Start';
-
-  if (!text) return; // no intention set — just pause, no review needed
-
+  if (!text || document.getElementById('intentionLocked').hidden) return;
   document.getElementById('intentionReviewText').textContent = text;
   setIntentionState('review');
-  const panel = document.getElementById('panelIntention');
-  if (panel.hidden) togglePanel('panelIntention', 'btnIntention');
 }
 
 const savedIntention = localStorage.getItem('luminesce_intention');
@@ -510,10 +511,12 @@ document.getElementById('btnIntentionSet').addEventListener('click', () => {
 });
 
 document.getElementById('btnIntentionYes').addEventListener('click', () => {
-  const panel = document.getElementById('panelIntention');
-  panel.classList.add('intention--achieved');
+  const section = document.getElementById('pomoIntention');
+  section.classList.add('intention--achieved');
   setTimeout(() => {
-    panel.classList.remove('intention--achieved');
+    section.classList.remove('intention--achieved');
+    document.getElementById('intentionText').value = '';
+    localStorage.removeItem('luminesce_intention');
     setIntentionState('input');
   }, 900);
 });

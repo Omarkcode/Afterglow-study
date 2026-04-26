@@ -93,17 +93,6 @@
         </svg>
       </button>
 
-      <!-- Session Intention -->
-      <button class="sb-btn" id="btnIntention" title="Session Intention" aria-label="Session Intention"
-              data-hint="Set your session intention before you start. Review it when the session ends.">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"/>
-          <circle cx="12" cy="12" r="6"/>
-          <circle cx="12" cy="12" r="2"/>
-        </svg>
-      </button>
-
       <!-- Deadline -->
       <button class="sb-btn" id="btnDeadline" title="Deadline" aria-label="Deadline"
               data-hint="Set a deadline with date and time — a live countdown keeps you on track.">
@@ -180,6 +169,28 @@
       <button class="t-action" id="btnPomoStart">Start</button>
       <button class="t-action t-action--ghost" id="btnPomoReset">Reset</button>
     </div>
+
+    <!-- Intention section (merged into pomo panel) -->
+    <div class="pomo-intention" id="pomoIntention">
+      <div class="intention-state" id="intentionInput">
+        <textarea class="intention-textarea" id="intentionText"
+                  placeholder="What do you intend to achieve this session?"></textarea>
+        <div class="intention-actions">
+          <button class="t-action" id="btnIntentionSet">Set Intention</button>
+        </div>
+      </div>
+      <div class="intention-state" id="intentionLocked" hidden>
+        <div class="intention-display" id="intentionDisplay"></div>
+      </div>
+      <div class="intention-state" id="intentionReview" hidden>
+        <p class="intention-question">Did you achieve your intention?</p>
+        <div class="intention-display intention-display--review" id="intentionReviewText"></div>
+        <div class="intention-review-btns">
+          <button class="t-action" id="btnIntentionYes">Yes ✓</button>
+          <button class="t-action t-action--ghost" id="btnIntentionNo">Not quite</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- ══ Tomato Jar Panel ═══════════════════════════════════════ -->
@@ -231,35 +242,6 @@
     <textarea class="notes-area" id="notesArea" placeholder="Write anything…"></textarea>
     <div class="task-footer">
       <button class="panel-clear-btn" id="btnNotesClear">Clear</button>
-    </div>
-  </div>
-
-  <!-- ══ Session Intention Panel ═══════════════════════════════ -->
-  <div class="panel panel--intention" id="panelIntention" hidden>
-    <div class="panel-handle">Session Intention</div>
-
-    <!-- Input state: set your intention -->
-    <div class="intention-state" id="intentionInput">
-      <textarea class="intention-textarea" id="intentionText"
-                placeholder="What do you intend to achieve this session?"></textarea>
-      <div class="intention-actions">
-        <button class="t-action" id="btnIntentionSet">Set Intention</button>
-      </div>
-    </div>
-
-    <!-- Locked state: shown during session -->
-    <div class="intention-state" id="intentionLocked" hidden>
-      <div class="intention-display" id="intentionDisplay"></div>
-    </div>
-
-    <!-- Review state: shown after session completes -->
-    <div class="intention-state" id="intentionReview" hidden>
-      <p class="intention-question">Did you achieve your intention?</p>
-      <div class="intention-display intention-display--review" id="intentionReviewText"></div>
-      <div class="intention-review-btns">
-        <button class="t-action" id="btnIntentionYes">Yes ✓</button>
-        <button class="t-action t-action--ghost" id="btnIntentionNo">Not quite</button>
-      </div>
     </div>
   </div>
 
