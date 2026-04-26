@@ -116,6 +116,8 @@
   gap: 10px;
 }
 
+.intention-state[hidden] { display: none; }
+
 .intention-textarea {
   width: 100%;
   min-height: 90px;
