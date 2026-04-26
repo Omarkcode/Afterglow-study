@@ -1,0 +1,76 @@
+/* ============================================================
+   hint.css — magnifying glass hint system (shared)
+   ============================================================ */
+
+.hint-icon {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: rgba(20, 30, 80, 0.70);
+  border: 1px solid rgba(80, 120, 230, 0.28);
+  color: rgba(130, 160, 230, 0.70);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  z-index: 60;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  pointer-events: auto;
+  flex-shrink: 0;
+}
+
+.hint-icon svg {
+  width: 8px;
+  height: 8px;
+  pointer-events: none;
+}
+
+.hint-icon:hover {
+  background: rgba(60, 90, 200, 0.55);
+  border-color: rgba(100, 150, 255, 0.50);
+  color: rgba(200, 220, 255, 0.92);
+}
+
+/* Slightly bigger version for menu cards */
+.grid-card .hint-icon {
+  bottom: auto;
+  top: 7px;
+  right: 7px;
+  width: 20px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.14);
+  color: rgba(180, 200, 255, 0.55);
+}
+
+.grid-card .hint-icon svg {
+  width: 11px;
+  height: 11px;
+}
+
+.grid-card .hint-icon:hover {
+  background: rgba(80, 120, 230, 0.20);
+  border-color: rgba(100, 150, 255, 0.40);
+  color: rgba(210, 230, 255, 0.90);
+}
+
+/* Tooltip bubble */
+.hint-tooltip {
+  position: fixed;
+  z-index: 9999;
+  background: rgba(6, 10, 32, 0.97);
+  border: 1px solid rgba(80, 120, 230, 0.30);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 0.78rem;
+  color: rgba(244, 234, 216, 0.84);
+  max-width: 215px;
+  line-height: 1.58;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.55);
+  pointer-events: none;
+  font-family: inherit;
+}

@@ -14,6 +14,7 @@
 
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="menu.css" />
+  <link rel="stylesheet" href="hint.css" />
 </head>
 <body>
 
@@ -39,7 +40,8 @@
     <div class="menu-grid">
 
       <!-- Classic -->
-      <button class="grid-card" data-mode="classic" tabindex="0">
+      <button class="grid-card" data-mode="classic" tabindex="0"
+              data-hint="A distraction-free study space with a timer, task list, music, notes, and deadline tracker.">
         <div class="grid-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -54,7 +56,8 @@
       </button>
 
       <!-- Pomodoro -->
-      <button class="grid-card" data-mode="pomodoro" tabindex="0">
+      <button class="grid-card" data-mode="pomodoro" tabindex="0"
+              data-hint="Study in focused intervals using the Pomodoro technique. Track your sessions with a Tomato Jar.">
         <div class="grid-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -72,7 +75,8 @@
       </button>
 
       <!-- Flight -->
-      <button class="grid-card" aria-disabled="true" tabindex="0">
+      <button class="grid-card" aria-disabled="true" tabindex="0"
+              data-hint="Coming soon!">
         <div class="grid-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -90,7 +94,8 @@
       </button>
 
       <!-- Study Buddy -->
-      <button class="grid-card" data-mode="study-buddy" tabindex="0">
+      <button class="grid-card" data-mode="study-buddy" tabindex="0"
+              data-hint="Chat with an AI that explains topics, makes flashcards, and quizzes you on anything.">
         <div class="grid-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -103,7 +108,8 @@
       </button>
 
       <!-- Library -->
-      <button class="grid-card" data-mode="library" tabindex="0">
+      <button class="grid-card" data-mode="library" tabindex="0"
+              data-hint="View and organise all your saved knowledge panels into named shelves.">
         <div class="grid-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -123,7 +129,8 @@
       </button>
 
       <!-- Groups -->
-      <button class="grid-card" aria-disabled="true" tabindex="0">
+      <button class="grid-card" aria-disabled="true" tabindex="0"
+              data-hint="Coming soon!">
         <div class="grid-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -139,7 +146,8 @@
       </button>
 
       <!-- Settings -->
-      <button class="grid-card" aria-disabled="true" tabindex="0">
+      <button class="grid-card" aria-disabled="true" tabindex="0"
+              data-hint="Coming soon!">
         <div class="grid-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -164,5 +172,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="background.js"></script>
   <script src="menu.js"></script>
+  <script src="hint.js"></script>
 </body>
 </html>

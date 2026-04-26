@@ -16,6 +16,7 @@
   <link rel="stylesheet" href="classic.css" />
   <link rel="stylesheet" href="knowledge.css" />
   <link rel="stylesheet" href="study-buddy.css" />
+  <link rel="stylesheet" href="hint.css" />
 </head>
 <body>
 
@@ -32,7 +33,8 @@
 
     <div class="sb-top">
       <!-- Knowledge Finder -->
-      <button class="sb-btn" id="btnKF" title="Knowledge Finder" aria-label="Knowledge Finder">
+      <button class="sb-btn" id="btnKF" title="Knowledge Finder" aria-label="Knowledge Finder"
+              data-hint="Your saved flashcard sets and quizzes, organised by shelf. Drag a panel into the chat to edit it with AI.">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
              stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
@@ -42,7 +44,8 @@
     </div>
 
     <!-- Exit -->
-    <button class="sb-btn sb-exit" id="btnExit" title="Back to Menu" aria-label="Back to Menu">
+    <button class="sb-btn sb-exit" id="btnExit" title="Back to Menu" aria-label="Back to Menu"
+            data-hint="Return to the main menu.">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
            stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
         <line x1="19" y1="12" x2="5" y2="12"/>
@@ -113,5 +116,6 @@
   <script src="background.js"></script>
   <script src="knowledge.js"></script>
   <script src="study-buddy.js"></script>
+  <script src="hint.js"></script>
 </body>
 </html>
