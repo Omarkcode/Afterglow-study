@@ -57,65 +57,101 @@ async function loadShelves() {
 
 async function renderKnowledgeFinder(listEl) {
   listEl.innerHTML = '<div class="kf-empty">Loading…</div>';
-
   const [shelves, panels] = await Promise.all([loadShelves(), loadKnowledgePanels()]);
-
-  if (panels.length === 0) {
+  if (panels.length === 0 && shelves.length === 0) {
     listEl.innerHTML = '<div class="kf-empty">No knowledge panels yet.<br>Ask Study Buddy to create one!</div>';
     return;
   }
+  renderKfRoot(listEl, shelves, panels);
+}
 
+// Root view: shelf tiles + unsorted panels
+function renderKfRoot(listEl, shelves, panels) {
   listEl.innerHTML = '';
 
-  // Track which panels have been placed in a shelf
-  const placed = new Set();
-
-  shelves.forEach(shelf => {
-    const shelfPanels = panels.filter(p => p.shelf_id === shelf.id);
-    if (shelfPanels.length === 0) return;
-
-    shelfPanels.forEach(p => placed.add(p.id));
-
-    const header = document.createElement('div');
-    header.className = 'kf-shelf-header';
-    header.textContent = `📚 ${shelf.name}`;
-    listEl.appendChild(header);
-
-    shelfPanels.forEach(p => appendKfCard(p, listEl));
-  });
+  // Shelf tiles
+  if (shelves.length > 0) {
+    const grid = document.createElement('div');
+    grid.className = 'kf-grid';
+    shelves.forEach(shelf => {
+      const shelfPanels = panels.filter(p => p.shelf_id === shelf.id);
+      const tile = document.createElement('div');
+      tile.className = 'kf-shelf-tile';
+      tile.innerHTML = `
+        <div class="kf-shelf-tile-icon">📚</div>
+        <div class="kf-shelf-tile-name">${escKf(shelf.name)}</div>
+        <div class="kf-shelf-tile-count">${shelfPanels.length} panel${shelfPanels.length !== 1 ? 's' : ''}</div>
+      `;
+      tile.addEventListener('click', () => renderKfShelf(listEl, shelf, shelfPanels, shelves, panels));
+      grid.appendChild(tile);
+    });
+    listEl.appendChild(grid);
+  }
 
   // Unsorted panels
-  const unsorted = panels.filter(p => !placed.has(p.id));
+  const unsorted = panels.filter(p => !p.shelf_id);
   if (unsorted.length > 0) {
-    if (placed.size > 0) {
-      const header = document.createElement('div');
-      header.className = 'kf-shelf-header';
-      header.textContent = '📂 Unsorted';
-      listEl.appendChild(header);
+    if (shelves.length > 0) {
+      const hdr = document.createElement('div');
+      hdr.className = 'kf-shelf-header';
+      hdr.textContent = '📂 Unsorted';
+      listEl.appendChild(hdr);
     }
-    unsorted.forEach(p => appendKfCard(p, listEl));
+    const grid = document.createElement('div');
+    grid.className = 'kf-grid';
+    unsorted.forEach(p => grid.appendChild(buildKfCard(p)));
+    listEl.appendChild(grid);
   }
 }
 
-function appendKfCard(panel, listEl) {
+// Shelf drill-down view: back button + panels inside that shelf
+function renderKfShelf(listEl, shelf, shelfPanels, allShelves, allPanels) {
+  listEl.innerHTML = '';
+
+  const nav = document.createElement('div');
+  nav.className = 'kf-shelf-nav';
+  nav.innerHTML = `
+    <button class="kf-back-btn">← Back</button>
+    <span class="kf-shelf-nav-name">${escKf(shelf.name)}</span>
+  `;
+  nav.querySelector('.kf-back-btn').addEventListener('click', () => {
+    renderKfRoot(listEl, allShelves, allPanels);
+  });
+  listEl.appendChild(nav);
+
+  if (shelfPanels.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'kf-empty';
+    empty.textContent = 'No panels in this shelf yet.';
+    listEl.appendChild(empty);
+    return;
+  }
+
+  const grid = document.createElement('div');
+  grid.className = 'kf-grid';
+  shelfPanels.forEach(p => grid.appendChild(buildKfCard(p)));
+  listEl.appendChild(grid);
+}
+
+function buildKfCard(panel) {
   const count = panel.questions?.length || 0;
   const icon  = panel.type === 'flashcard' ? '🃏' : '📝';
   const label = panel.type === 'flashcard'
     ? `${count} card${count !== 1 ? 's' : ''}`
-    : `${count} question${count !== 1 ? 's' : ''}`;
+    : `${count} q${count !== 1 ? 's' : ''}`;
 
   const card = document.createElement('div');
   card.className = 'kf-card';
   card.draggable = true;
   card.innerHTML = `
-    <div class="kf-card-top">
+    <div class="kf-card-icon-row">
       <span class="kf-card-icon">${icon}</span>
-      <span class="kf-card-name">${escKf(panel.name)}</span>
     </div>
-    <div class="kf-card-meta">${label}${window.KF_EDIT_MODE ? ' · drag to chat to edit' : ''}</div>
+    <div class="kf-card-name">${escKf(panel.name)}</div>
+    <div class="kf-card-meta">${label}</div>
     <div class="kf-card-btns">
-      <button class="kf-btn kf-btn--play" data-id="${panel.id}">▶ Play</button>
-      ${window.KF_EDIT_MODE ? `<button class="kf-btn kf-btn--edit" data-id="${panel.id}">✦ Edit</button>` : ''}
+      <button class="kf-btn kf-btn--play">▶</button>
+      ${window.KF_EDIT_MODE ? `<button class="kf-btn kf-btn--edit">✦</button>` : ''}
     </div>
   `;
 
@@ -133,7 +169,7 @@ function appendKfCard(panel, listEl) {
     });
   }
 
-  listEl.appendChild(card);
+  return card;
 }
 
 function escKf(str) {
