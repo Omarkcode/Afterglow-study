@@ -18,7 +18,45 @@ function buildSky() {
 function drawSky() {
   const W = skyCanvas.width;
   const H = skyCanvas.height;
+  const isDay = document.documentElement.getAttribute('data-theme') === 'day';
   skyCtx.clearRect(0, 0, W, H);
+
+  if (isDay) {
+    // Blue sky gradient
+    const skyGrd = skyCtx.createLinearGradient(0, 0, 0, H);
+    skyGrd.addColorStop(0,    '#1a6db5');
+    skyGrd.addColorStop(0.30, '#3a9fd5');
+    skyGrd.addColorStop(0.60, '#87ceeb');
+    skyGrd.addColorStop(0.85, '#b8e2f5');
+    skyGrd.addColorStop(1,    '#d6eefc');
+    skyCtx.fillStyle = skyGrd;
+    skyCtx.fillRect(0, 0, W, H);
+
+    // Sun glow
+    const sx = W * 0.78, sy = H * 0.16, sr = 46;
+    const sunGlow = skyCtx.createRadialGradient(sx, sy, 0, sx, sy, sr * 9);
+    sunGlow.addColorStop(0,    'rgba(255, 255, 210, 0.55)');
+    sunGlow.addColorStop(0.18, 'rgba(255, 240, 140, 0.26)');
+    sunGlow.addColorStop(0.45, 'rgba(255, 220,  80, 0.10)');
+    sunGlow.addColorStop(1,    'transparent');
+    skyCtx.beginPath(); skyCtx.arc(sx, sy, sr * 9, 0, Math.PI * 2);
+    skyCtx.fillStyle = sunGlow; skyCtx.fill();
+
+    // Sun disk
+    const sunDisk = skyCtx.createRadialGradient(sx - sr * 0.2, sy - sr * 0.2, 0, sx, sy, sr);
+    sunDisk.addColorStop(0,   '#fffde7');
+    sunDisk.addColorStop(0.5, '#fff176');
+    sunDisk.addColorStop(1,   '#ffcc02');
+    skyCtx.beginPath(); skyCtx.arc(sx, sy, sr, 0, Math.PI * 2);
+    skyCtx.fillStyle = sunDisk; skyCtx.fill();
+
+    // Clouds
+    drawCloud(skyCtx, W * 0.13, H * 0.24, 1.2);
+    drawCloud(skyCtx, W * 0.42, H * 0.12, 0.9);
+    drawCloud(skyCtx, W * 0.60, H * 0.32, 1.1);
+    drawCloud(skyCtx, W * 0.84, H * 0.22, 0.85);
+    return;
+  }
 
   const nebulae = [
     { cx: W*0.48, cy: H*0.18, rx: W*0.20, ry: H*0.09, r: 160, g: 140, b: 100, a: 0.14 },
@@ -143,6 +181,24 @@ function drawStarSpike(ctx, x, y, r) {
     ctx.moveTo(x - cos * len, y - sin * len);
     ctx.lineTo(x + cos * len, y + sin * len);
     ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawCloud(ctx, cx, cy, scale) {
+  ctx.save();
+  ctx.globalAlpha = 0.82;
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.90)';
+  const bumps = [
+    { dx:   0, dy:  0, r: 28 * scale },
+    { dx: -26, dy:  8, r: 20 * scale },
+    { dx:  26, dy:  8, r: 20 * scale },
+    { dx: -14, dy: 18, r: 17 * scale },
+    { dx:  14, dy: 18, r: 17 * scale },
+    { dx:   0, dy: 22, r: 22 * scale },
+  ];
+  for (const b of bumps) {
+    ctx.beginPath(); ctx.arc(cx + b.dx, cy + b.dy, b.r, 0, Math.PI * 2); ctx.fill();
   }
   ctx.restore();
 }
@@ -354,32 +410,41 @@ function drawRooftop(ctx, rt) {
 
 function animateCity() {
   const W = cityCanvas.width, H = cityCanvas.height;
+  const isDay = document.documentElement.getAttribute('data-theme') === 'day';
   cityCtx.clearRect(0, 0, W, H);
   cityFrame++;
 
   for (const b of buildings) drawBuilding(cityCtx, b);
 
-  const horizGrd = cityCtx.createLinearGradient(0, H * 0.68, 0, H);
-  horizGrd.addColorStop(0, 'transparent');
-  horizGrd.addColorStop(1, 'rgba(255, 125, 28, 0.07)');
-  cityCtx.fillStyle = horizGrd;
-  cityCtx.fillRect(0, H * 0.68, W, H * 0.32);
+  if (isDay) {
+    const horizGrd = cityCtx.createLinearGradient(0, H * 0.68, 0, H);
+    horizGrd.addColorStop(0, 'transparent');
+    horizGrd.addColorStop(1, 'rgba(180, 220, 255, 0.18)');
+    cityCtx.fillStyle = horizGrd;
+    cityCtx.fillRect(0, H * 0.68, W, H * 0.32);
+  } else {
+    const horizGrd = cityCtx.createLinearGradient(0, H * 0.68, 0, H);
+    horizGrd.addColorStop(0, 'transparent');
+    horizGrd.addColorStop(1, 'rgba(255, 125, 28, 0.07)');
+    cityCtx.fillStyle = horizGrd;
+    cityCtx.fillRect(0, H * 0.68, W, H * 0.32);
 
-  for (const l of cityLights) {
-    const tw    = Math.sin(cityFrame * l.speed * 60 + l.phase) * 0.11;
-    const alpha = Math.max(0.06, Math.min(0.92, l.base + tw));
-    const hsla  = (a) => `hsla(${l.hue},${l.sat}%,${l.lit}%,${a})`;
+    for (const l of cityLights) {
+      const tw    = Math.sin(cityFrame * l.speed * 60 + l.phase) * 0.11;
+      const alpha = Math.max(0.06, Math.min(0.92, l.base + tw));
+      const hsla  = (a) => `hsla(${l.hue},${l.sat}%,${l.lit}%,${a})`;
 
-    const glow = cityCtx.createRadialGradient(l.x, l.y, 0, l.x, l.y, l.r * 5.5);
-    glow.addColorStop(0, hsla(alpha * 0.38));
-    glow.addColorStop(1, 'transparent');
-    cityCtx.beginPath(); cityCtx.arc(l.x, l.y, l.r * 5.5, 0, Math.PI * 2);
-    cityCtx.fillStyle = glow; cityCtx.fill();
+      const glow = cityCtx.createRadialGradient(l.x, l.y, 0, l.x, l.y, l.r * 5.5);
+      glow.addColorStop(0, hsla(alpha * 0.38));
+      glow.addColorStop(1, 'transparent');
+      cityCtx.beginPath(); cityCtx.arc(l.x, l.y, l.r * 5.5, 0, Math.PI * 2);
+      cityCtx.fillStyle = glow; cityCtx.fill();
 
-    cityCtx.beginPath(); cityCtx.arc(l.x, l.y, l.r, 0, Math.PI * 2);
-    cityCtx.fillStyle = `hsl(${l.hue},${l.sat}%,${l.lit}%)`;
-    cityCtx.globalAlpha = alpha; cityCtx.fill();
-    cityCtx.globalAlpha = 1;
+      cityCtx.beginPath(); cityCtx.arc(l.x, l.y, l.r, 0, Math.PI * 2);
+      cityCtx.fillStyle = `hsl(${l.hue},${l.sat}%,${l.lit}%)`;
+      cityCtx.globalAlpha = alpha; cityCtx.fill();
+      cityCtx.globalAlpha = 1;
+    }
   }
 
   requestAnimationFrame(animateCity);

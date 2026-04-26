@@ -419,3 +419,10 @@ body {
   border-color: rgba(255, 175, 70, 0.30);
   background: rgba(255, 175, 70, 0.06);
 }
+
+/* ============================================================
+   DAY MODE OVERRIDES
+   ============================================================ */
+[data-theme="day"] body { background: #87ceeb; }
+[data-theme="day"] .moon { display: none; }
+[data-theme="day"] .bg-blur { opacity: 0.05; }

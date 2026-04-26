@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Luminesce Study — Settings</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- theme.js must be synchronous in <head> to avoid flash -->
+  <script src="theme.js"></script>
+
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="knowledge.css" />
+  <link rel="stylesheet" href="settings.css" />
+  <link rel="stylesheet" href="hint.css" />
+</head>
+<body>
+
+  <!-- Starry / day background -->
+  <canvas id="skyCanvas"></canvas>
+  <canvas id="cityCanvas"></canvas>
+  <div class="moon" aria-hidden="true"></div>
+
+  <!-- Dark overlay -->
+  <div class="set-backdrop" aria-hidden="true"></div>
+
+  <!-- ══ Settings Page ════════════════════════════════════════ -->
+  <div class="set-page" id="settingPage">
+
+    <header class="set-header">
+      <button class="set-back" id="btnBack">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+             width="13" height="13">
+          <line x1="19" y1="12" x2="5" y2="12"/>
+          <polyline points="12 19 5 12 12 5"/>
+        </svg>
+        Menu
+      </button>
+      <h1 class="set-title">Settings</h1>
+      <div style="width:72px"></div><!-- spacer -->
+    </header>
+
+    <div class="set-content">
+
+      <!-- ── Account card ──────────────────────────────────── -->
+      <div class="set-account-card">
+        <div class="set-avatar" id="settingAvatar">?</div>
+        <div class="set-account-info">
+          <div class="set-name-row">
+            <span class="set-name-val" id="settingName" title="Click to edit display name">—</span>
+            <span class="set-name-edit-hint">✏ tap to edit</span>
+          </div>
+          <div class="set-email" id="settingEmail">—</div>
+          <div class="set-joined" id="settingJoined"></div>
+        </div>
+      </div>
+
+      <!-- ── Appearance ─────────────────────────────────────── -->
+      <div class="set-section">
+        <div class="set-section-title">Appearance</div>
+
+        <div class="set-row">
+          <div class="set-row-body">
+            <div class="set-row-label">☀️ Day Mode</div>
+            <div class="set-row-desc">Switches the background to a bright blue daytime sky.</div>
+          </div>
+          <label class="set-toggle" data-hint="Switch between the night sky and a bright daytime sky.">
+            <input type="checkbox" id="dayModeToggle">
+            <span class="set-toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- ── Study ──────────────────────────────────────────── -->
+      <div class="set-section">
+        <div class="set-section-title">Study</div>
+
+        <div class="set-row">
+          <div class="set-row-body">
+            <div class="set-row-label">🔔 Session Chimes</div>
+            <div class="set-row-desc">Play a gentle sound when a Pomodoro timer ends.</div>
+          </div>
+          <label class="set-toggle">
+            <input type="checkbox" id="chimeToggle" checked>
+            <span class="set-toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="set-row">
+          <div class="set-row-body">
+            <div class="set-row-label">
+              🍅 Pomodoro Count
+              <span class="set-pomo-count" id="settingPomoCount"></span>
+            </div>
+            <div class="set-row-desc">Total completed Pomodoro sessions on your account.</div>
+          </div>
+          <button class="set-btn" id="btnResetPomo">Reset</button>
+        </div>
+      </div>
+
+      <!-- ── Data ───────────────────────────────────────────── -->
+      <div class="set-section">
+        <div class="set-section-title">Data</div>
+
+        <div class="set-row">
+          <div class="set-row-body">
+            <div class="set-row-label">🗑️ Clear Study Data</div>
+            <div class="set-row-desc">Removes local tasks, notes, deadline, distractions, and session intention.</div>
+          </div>
+          <button class="set-btn set-btn--danger" id="btnClearData">Clear</button>
+        </div>
+      </div>
+
+      <!-- ── Account actions ────────────────────────────────── -->
+      <div class="set-section">
+        <div class="set-section-title">Account</div>
+
+        <div class="set-row">
+          <div class="set-row-body">
+            <div class="set-row-label">🔑 Change Password</div>
+            <div class="set-row-desc">Sends a password reset link to your email address.</div>
+          </div>
+          <button class="set-btn" id="btnChangePassword">Send link</button>
+        </div>
+
+        <div class="set-row">
+          <div class="set-row-body">
+            <div class="set-row-label">→ Sign Out</div>
+            <div class="set-row-desc">Sign out of your Luminesce account on this device.</div>
+          </div>
+          <button class="set-btn set-btn--signout" id="btnSignOut">Sign out</button>
+        </div>
+      </div>
+
+    </div><!-- /.set-content -->
+  </div><!-- /.set-page -->
+
+  <!-- Toast notification -->
+  <div class="set-toast" id="settingToast" hidden></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="background.js"></script>
+  <script src="knowledge.js"></script>
+  <script src="settings.js"></script>
+  <script src="hint.js"></script>
+</body>
+</html>
