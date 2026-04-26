@@ -42,6 +42,18 @@
           <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
         </svg>
       </button>
+
+      <!-- Usage -->
+      <button class="sb-btn" id="btnUsage" title="API Usage" aria-label="API Usage"
+              data-hint="See how many messages and tokens you've used today. Resets at midnight.">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="20" x2="18" y2="10"/>
+          <line x1="12" y1="20" x2="12" y2="4"/>
+          <line x1="6"  y1="20" x2="6"  y2="14"/>
+          <line x1="3"  y1="20" x2="21" y2="20"/>
+        </svg>
+      </button>
     </div>
 
     <!-- Exit -->
@@ -60,6 +72,38 @@
   <div class="kf-panel" id="kfPanel" hidden>
     <div class="kf-header">📚 Knowledge Finder</div>
     <div class="kf-list" id="kfList"></div>
+  </div>
+
+  <!-- ══ Usage Panel ═══════════════════════════════════════════ -->
+  <div class="sb-usage-panel" id="usagePanel" hidden>
+    <div class="sb-usage-header">
+      <span>📊 Usage Today</span>
+      <span class="sb-usage-resets" id="usageResets">—</span>
+    </div>
+
+    <div class="sb-usage-row">
+      <div class="sb-usage-label">
+        <span>Messages</span>
+        <span class="sb-usage-val" id="usageMsgCount">0</span>
+      </div>
+      <div class="sb-usage-bar-wrap">
+        <div class="sb-usage-bar-fill" id="usageMsgBar" style="width:0%"></div>
+      </div>
+      <div class="sb-usage-limit">/ 6,000</div>
+    </div>
+
+    <div class="sb-usage-row">
+      <div class="sb-usage-label">
+        <span>Tokens (approx)</span>
+        <span class="sb-usage-val" id="usageTokCount">0</span>
+      </div>
+      <div class="sb-usage-bar-wrap">
+        <div class="sb-usage-bar-fill sb-usage-bar-fill--tok" id="usageTokBar" style="width:0%"></div>
+      </div>
+      <div class="sb-usage-limit">/ 500K</div>
+    </div>
+
+    <div class="sb-usage-note">Groq free tier · llama-3.3-70b-versatile</div>
   </div>
 
   <!-- ══ Main Chat Area ════════════════════════════════════════ -->

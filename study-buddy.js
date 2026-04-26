@@ -84,6 +84,59 @@ function clearEditPanel() {
 
 document.getElementById('sbEditChipClose').addEventListener('click', clearEditPanel);
 
+// ── Usage tracking ────────────────────────────────────────────
+
+const GROQ_MSG_LIMIT = 6000;
+const GROQ_TOK_LIMIT = 500000;
+
+function getUsageData() {
+  const today = new Date().toISOString().slice(0, 10);
+  try {
+    const raw = JSON.parse(localStorage.getItem('luminesce_groq_usage') || '{}');
+    if (raw.date === today) return raw;
+  } catch { /* invalid JSON */ }
+  return { date: new Date().toISOString().slice(0, 10), messages: 0, approxTokens: 0 };
+}
+
+function recordUsage(inputText, responseText) {
+  const data = getUsageData();
+  data.messages += 1;
+  data.approxTokens += Math.round((inputText.length + responseText.length) / 4);
+  localStorage.setItem('luminesce_groq_usage', JSON.stringify(data));
+  if (!document.getElementById('usagePanel').hidden) renderUsagePanel();
+}
+
+function renderUsagePanel() {
+  const data = getUsageData();
+
+  const now = new Date();
+  const midnight = new Date(now);
+  midnight.setHours(24, 0, 0, 0);
+  const msLeft = midnight - now;
+  const hLeft  = Math.floor(msLeft / 3600000);
+  const mLeft  = Math.floor((msLeft % 3600000) / 60000);
+  document.getElementById('usageResets').textContent = `Resets in ${hLeft}h ${mLeft}m`;
+
+  const msgPct = Math.min(100, (data.messages / GROQ_MSG_LIMIT) * 100);
+  const tokPct = Math.min(100, (data.approxTokens / GROQ_TOK_LIMIT) * 100);
+
+  document.getElementById('usageMsgCount').textContent = data.messages;
+  document.getElementById('usageTokCount').textContent =
+    data.approxTokens >= 1000
+      ? `~${(data.approxTokens / 1000).toFixed(1)}K`
+      : `~${data.approxTokens}`;
+  document.getElementById('usageMsgBar').style.width = msgPct + '%';
+  document.getElementById('usageTokBar').style.width = tokPct + '%';
+}
+
+document.getElementById('btnUsage').addEventListener('click', () => {
+  const panel = document.getElementById('usagePanel');
+  const open  = panel.hidden;
+  panel.hidden = !open;
+  document.getElementById('btnUsage').classList.toggle('sb-btn--active', open);
+  if (open) renderUsagePanel();
+});
+
 // ── Knowledge Finder panel ────────────────────────────────────
 
 window.KF_EDIT_MODE = true;
@@ -384,6 +437,7 @@ async function sendToGroq(userDisplayText, apiUserText, editingPanel, attachment
     }
 
     updateBubble(aiMsgEl, fullResponse, false);
+    recordUsage(apiUserText, fullResponse);
     conversationHistory.push({ role: 'assistant', content: fullResponse });
 
     if (conversationHistory.length > 24) {
