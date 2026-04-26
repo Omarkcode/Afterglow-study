@@ -34,13 +34,6 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   setTimeout(() => { panel.style.opacity = '1'; }, 300);
 })();
 
-// ── Sign Out ──────────────────────────────────────────────────
-
-document.getElementById('signOutBtn').addEventListener('click', async () => {
-  await sb.auth.signOut();
-  window.location.href = 'index.html';
-});
-
 // ── Background (shared functions from background.js) ─────────
 
 startBackground();
