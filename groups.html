@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Luminesce Study — Groups</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <script src="theme.js"></script>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="knowledge.css" />
+  <link rel="stylesheet" href="groups.css" />
+</head>
+<body>
+
+  <canvas id="skyCanvas"></canvas>
+  <canvas id="cityCanvas"></canvas>
+  <div class="moon" aria-hidden="true"></div>
+
+  <div class="grp-backdrop" aria-hidden="true"></div>
+
+  <div class="grp-page" id="grpPage" style="opacity:0">
+
+    <!-- ══ Header ═══════════════════════════════════════════ -->
+    <header class="grp-header">
+      <button class="grp-back" id="btnBack">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+             width="13" height="13">
+          <line x1="19" y1="12" x2="5" y2="12"/>
+          <polyline points="12 19 5 12 12 5"/>
+        </svg>
+        Menu
+      </button>
+      <h1 class="grp-title">Groups</h1>
+      <div class="grp-header-btns">
+        <button class="grp-btn grp-btn--ghost" id="btnJoinGroup">Join</button>
+        <button class="grp-btn grp-btn--primary" id="btnCreateGroup">+ New Group</button>
+      </div>
+    </header>
+
+    <!-- ══ Body ═════════════════════════════════════════════ -->
+    <div class="grp-body">
+
+      <!-- Left: group list -->
+      <aside class="grp-sidebar">
+        <div id="grpListWrap"></div>
+      </aside>
+
+      <!-- Right: group detail -->
+      <main class="grp-detail" id="grpDetail"></main>
+
+    </div>
+  </div>
+
+  <!-- ══ Modal ════════════════════════════════════════════════ -->
+  <div class="grp-modal-backdrop" id="grpModalBackdrop" hidden>
+    <div class="grp-modal" id="grpModal"></div>
+  </div>
+
+  <!-- Toast -->
+  <div class="grp-toast" id="grpToast" hidden></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="background.js"></script>
+  <script src="knowledge.js"></script>
+  <script src="groups.js"></script>
+</body>
+</html>

@@ -1,0 +1,617 @@
+/* ============================================================
+   groups.css — Study Groups page
+   ============================================================ */
+
+/* ── Backdrop ────────────────────────────────────────────────── */
+.grp-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 7, 20, 0.84);
+  backdrop-filter: blur(4px);
+  z-index: 8;
+}
+
+/* ── Page container ──────────────────────────────────────────── */
+.grp-page {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+  transition: opacity 0.3s ease;
+}
+
+/* ── Header ──────────────────────────────────────────────────── */
+.grp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 36px;
+  background: rgba(4, 7, 20, 0.92);
+  border-bottom: 1px solid rgba(255, 175, 70, 0.10);
+  backdrop-filter: blur(16px);
+  flex-shrink: 0;
+}
+
+.grp-back {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: 1px solid rgba(80, 120, 230, 0.20);
+  border-radius: 10px;
+  color: rgba(180, 200, 255, 0.55);
+  padding: 7px 14px;
+  font-size: 0.82rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.grp-back:hover {
+  background: rgba(80, 120, 230, 0.10);
+  color: rgba(210, 220, 255, 0.90);
+}
+
+.grp-title {
+  font-family: 'Dancing Script', cursive;
+  font-size: 2.1rem;
+  font-weight: 500;
+  color: rgba(255, 220, 160, 0.88);
+}
+
+.grp-header-btns {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* ── Buttons ─────────────────────────────────────────────────── */
+.grp-btn {
+  padding: 7px 16px;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s;
+  border: 1px solid transparent;
+}
+
+.grp-btn--ghost {
+  background: none;
+  border-color: rgba(80, 120, 230, 0.22);
+  color: rgba(180, 200, 255, 0.60);
+}
+.grp-btn--ghost:hover {
+  background: rgba(80, 120, 230, 0.10);
+  color: rgba(210, 220, 255, 0.90);
+}
+
+.grp-btn--primary {
+  background: rgba(255, 175, 70, 0.15);
+  border-color: rgba(255, 175, 70, 0.32);
+  color: #ffc860;
+}
+.grp-btn--primary:hover { background: rgba(255, 175, 70, 0.26); }
+
+.grp-btn--amber {
+  background: rgba(255, 175, 70, 0.10);
+  border-color: rgba(255, 175, 70, 0.25);
+  color: rgba(255, 200, 120, 0.82);
+}
+.grp-btn--amber:hover { background: rgba(255, 175, 70, 0.20); }
+
+.grp-btn--danger {
+  background: rgba(255, 80, 80, 0.08);
+  border-color: rgba(255, 80, 80, 0.22);
+  color: rgba(255, 140, 140, 0.78);
+}
+.grp-btn--danger:hover {
+  background: rgba(255, 80, 80, 0.15);
+  color: rgba(255, 160, 160, 0.90);
+}
+
+.grp-btn:disabled {
+  opacity: 0.40;
+  cursor: not-allowed;
+}
+
+/* ── Two-pane body ───────────────────────────────────────────── */
+.grp-body {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* ── Sidebar ─────────────────────────────────────────────────── */
+.grp-sidebar {
+  width: 256px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  border-right: 1px solid rgba(80, 120, 230, 0.11);
+  padding: 14px 10px;
+}
+.grp-sidebar::-webkit-scrollbar       { width: 4px; }
+.grp-sidebar::-webkit-scrollbar-track { background: transparent; }
+.grp-sidebar::-webkit-scrollbar-thumb { background: rgba(80,120,230,0.16); border-radius: 2px; }
+
+.grp-sidebar-empty {
+  padding: 36px 14px;
+  text-align: center;
+  color: rgba(244, 234, 216, 0.24);
+  font-size: 0.82rem;
+  line-height: 1.75;
+}
+
+/* ── Group list item ─────────────────────────────────────────── */
+.grp-item {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 9px 10px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+  margin-bottom: 3px;
+}
+.grp-item:hover          { background: rgba(255, 255, 255, 0.04); }
+.grp-item--active        { background: rgba(255, 175, 70, 0.09); }
+.grp-item--active:hover  { background: rgba(255, 175, 70, 0.13); }
+
+.grp-item-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(80, 120, 230, 0.16);
+  border: 1px solid rgba(80, 120, 230, 0.22);
+  color: rgba(180, 210, 255, 0.78);
+  font-size: 1.0rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s, border-color 0.15s;
+}
+.grp-item--active .grp-item-avatar {
+  background: rgba(255, 175, 70, 0.15);
+  border-color: rgba(255, 175, 70, 0.28);
+  color: rgba(255, 210, 120, 0.90);
+}
+
+.grp-item-info { overflow: hidden; }
+
+.grp-item-name {
+  font-size: 0.875rem;
+  color: rgba(244, 234, 216, 0.72);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.15s;
+}
+.grp-item--active .grp-item-name { color: rgba(255, 215, 140, 0.90); }
+
+.grp-item-sub {
+  font-size: 0.70rem;
+  color: rgba(180, 200, 255, 0.30);
+  margin-top: 1px;
+}
+
+/* ── Detail pane ─────────────────────────────────────────────── */
+.grp-detail {
+  flex: 1;
+  overflow-y: auto;
+  padding: 32px 44px 64px;
+}
+.grp-detail::-webkit-scrollbar       { width: 5px; }
+.grp-detail::-webkit-scrollbar-track { background: transparent; }
+.grp-detail::-webkit-scrollbar-thumb { background: rgba(80,120,230,0.14); border-radius: 3px; }
+
+/* ── Detail empty state ──────────────────────────────────────── */
+.grp-detail-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 130px);
+  text-align: center;
+  gap: 14px;
+  color: rgba(244, 234, 216, 0.30);
+}
+
+.grp-detail-empty-icon { font-size: 3.2rem; margin-bottom: 4px; }
+
+.grp-detail-empty p {
+  font-size: 0.90rem;
+  line-height: 1.70;
+}
+
+.grp-detail-empty-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 4px;
+}
+
+/* ── Detail head ─────────────────────────────────────────────── */
+.grp-detail-head { margin-bottom: 32px; }
+
+.grp-detail-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.grp-detail-name {
+  font-family: 'Dancing Script', cursive;
+  font-size: 2.0rem;
+  color: rgba(255, 215, 140, 0.90);
+  font-weight: 500;
+  line-height: 1.1;
+}
+
+.grp-code-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.grp-code-label {
+  font-size: 0.73rem;
+  color: rgba(180, 200, 255, 0.36);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  white-space: nowrap;
+}
+
+.grp-code {
+  font-family: 'Courier New', monospace;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 4px;
+  color: rgba(255, 215, 140, 0.88);
+  background: rgba(255, 175, 70, 0.08);
+  border: 1px solid rgba(255, 175, 70, 0.20);
+  padding: 4px 12px;
+  border-radius: 8px;
+  user-select: all;
+}
+
+.grp-code-copy {
+  background: none;
+  border: 1px solid rgba(80, 120, 230, 0.18);
+  border-radius: 7px;
+  color: rgba(180, 200, 255, 0.48);
+  font-size: 0.74rem;
+  font-family: inherit;
+  padding: 4px 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+.grp-code-copy:hover {
+  background: rgba(80, 120, 230, 0.10);
+  color: rgba(210, 220, 255, 0.85);
+}
+
+/* ── Sections ────────────────────────────────────────────────── */
+.grp-section { margin-bottom: 34px; }
+
+.grp-section-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(80, 120, 230, 0.09);
+}
+
+.grp-section-hdr-left {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.grp-section-title {
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(180, 200, 255, 0.42);
+  font-weight: 500;
+}
+
+.grp-section-count {
+  font-size: 0.68rem;
+  color: rgba(180, 200, 255, 0.24);
+}
+
+/* ── Members list ────────────────────────────────────────────── */
+.grp-members-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.grp-member {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(80, 120, 230, 0.09);
+  border-radius: 11px;
+}
+
+.grp-member-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: rgba(80, 120, 230, 0.13);
+  border: 1px solid rgba(80, 120, 230, 0.18);
+  color: rgba(180, 210, 255, 0.72);
+  font-size: 0.88rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.grp-member-name {
+  font-size: 0.875rem;
+  color: rgba(244, 234, 216, 0.78);
+  flex: 1;
+}
+
+.grp-member-badge {
+  font-size: 0.64rem;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  background: rgba(255, 175, 70, 0.12);
+  border: 1px solid rgba(255, 175, 70, 0.24);
+  color: rgba(255, 200, 120, 0.72);
+  padding: 2px 7px;
+  border-radius: 5px;
+}
+
+.grp-member-you {
+  font-size: 0.64rem;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: rgba(180, 200, 255, 0.26);
+}
+
+/* ── Panels grid ─────────────────────────────────────────────── */
+.grp-panels-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.grp-panels-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: rgba(244, 234, 216, 0.20);
+  font-size: 0.84rem;
+  padding: 28px 0;
+  font-style: italic;
+}
+
+.grp-panel-card {
+  background: rgba(10, 16, 50, 0.72);
+  border: 1px solid rgba(80, 120, 230, 0.13);
+  border-radius: 13px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  transition: border-color 0.15s, transform 0.15s;
+}
+.grp-panel-card:hover {
+  border-color: rgba(80, 120, 230, 0.26);
+  transform: translateY(-1px);
+}
+
+.grp-panel-icon { font-size: 1.1rem; }
+
+.grp-panel-name {
+  font-size: 0.875rem;
+  color: rgba(244, 234, 216, 0.84);
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.grp-panel-meta {
+  font-size: 0.71rem;
+  color: rgba(180, 200, 255, 0.34);
+  flex: 1;
+  margin-top: 2px;
+}
+
+.grp-panel-btns {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.grp-panel-btn {
+  flex: 1;
+  padding: 5px 0;
+  border-radius: 8px;
+  border: 1px solid rgba(80, 120, 230, 0.16);
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(180, 200, 255, 0.52);
+  font-size: 0.72rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.grp-panel-btn--play:hover {
+  background: rgba(255, 175, 70, 0.11);
+  border-color: rgba(255, 175, 70, 0.26);
+  color: #ffc860;
+}
+.grp-panel-btn--del {
+  flex: 0;
+  padding: 5px 10px;
+}
+.grp-panel-btn--del:hover {
+  background: rgba(255, 80, 80, 0.08);
+  border-color: rgba(255, 80, 80, 0.22);
+  color: rgba(255, 140, 140, 0.75);
+}
+
+/* ── Loading state ───────────────────────────────────────────── */
+.grp-loading {
+  text-align: center;
+  padding: 60px 20px;
+  color: rgba(244, 234, 216, 0.26);
+  font-size: 0.88rem;
+}
+
+/* ── Modal ───────────────────────────────────────────────────── */
+.grp-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.60);
+  backdrop-filter: blur(6px);
+  z-index: 400;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.grp-modal-backdrop[hidden] { display: none; }
+
+.grp-modal {
+  background: rgba(8, 11, 28, 0.97);
+  border: 1px solid rgba(80, 120, 230, 0.22);
+  border-radius: 18px;
+  width: min(430px, 90vw);
+  max-height: 72vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.60);
+  padding: 24px;
+  gap: 14px;
+  animation: grpModalIn 0.18s ease;
+}
+
+@keyframes grpModalIn {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0); }
+}
+
+.grp-modal-title {
+  font-family: 'Dancing Script', cursive;
+  font-size: 1.55rem;
+  color: rgba(255, 215, 140, 0.90);
+  flex-shrink: 0;
+}
+
+.grp-modal-desc {
+  font-size: 0.84rem;
+  color: rgba(244, 234, 216, 0.42);
+  line-height: 1.55;
+  flex-shrink: 0;
+}
+.grp-modal-desc strong { color: rgba(255, 215, 140, 0.68); font-weight: 500; }
+
+.grp-modal-input {
+  background: rgba(10, 16, 52, 0.80);
+  border: 1px solid rgba(80, 120, 230, 0.24);
+  border-radius: 11px;
+  padding: 10px 14px;
+  color: rgba(244, 234, 216, 0.90);
+  font-size: 0.88rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+  flex-shrink: 0;
+}
+.grp-modal-input:focus  { border-color: rgba(255, 175, 70, 0.40); }
+.grp-modal-input::placeholder { color: rgba(180, 200, 255, 0.22); }
+
+.grp-modal-input--code {
+  font-family: 'Courier New', monospace;
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: 5px;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.grp-modal-btns {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+/* ── Share panel list ────────────────────────────────────────── */
+.grp-share-list {
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-height: 0;
+}
+.grp-share-list::-webkit-scrollbar       { width: 4px; }
+.grp-share-list::-webkit-scrollbar-track { background: transparent; }
+.grp-share-list::-webkit-scrollbar-thumb { background: rgba(80,120,230,0.16); border-radius: 2px; }
+
+.grp-share-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 11px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(80, 120, 230, 0.09);
+  border-radius: 10px;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.grp-share-row:hover { background: rgba(255, 255, 255, 0.04); }
+
+.grp-share-icon  { font-size: 1rem; flex-shrink: 0; }
+
+.grp-share-name {
+  flex: 1;
+  font-size: 0.84rem;
+  color: rgba(244, 234, 216, 0.78);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.grp-share-count {
+  font-size: 0.72rem;
+  color: rgba(180, 200, 255, 0.30);
+  flex-shrink: 0;
+}
+
+/* ── Toast ───────────────────────────────────────────────────── */
+.grp-toast {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%) translateY(16px);
+  background: rgba(8, 11, 28, 0.96);
+  border: 1px solid rgba(80, 120, 230, 0.22);
+  border-radius: 12px;
+  padding: 10px 20px;
+  font-size: 0.84rem;
+  color: rgba(244, 234, 216, 0.80);
+  z-index: 500;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.grp-toast--visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}

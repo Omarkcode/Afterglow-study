@@ -139,6 +139,36 @@ document.querySelector('[data-mode="study-buddy"]').addEventListener('click', (e
   setTimeout(() => { window.location.href = 'study-buddy.html'; }, 570);
 });
 
+document.querySelector('[data-mode="groups"]').addEventListener('click', (e) => {
+  const card = e.currentTarget;
+  const icon = card.querySelector('.grid-icon');
+  const r    = icon.getBoundingClientRect();
+
+  const zoom = document.createElement('div');
+  zoom.style.cssText = `
+    position: fixed;
+    left: ${r.left + r.width  / 2}px;
+    top:  ${r.top  + r.height / 2}px;
+    width: 4px; height: 4px;
+    background: #06091a;
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(1);
+    z-index: 1000;
+    pointer-events: none;
+    transition: transform 0.55s cubic-bezier(0.4, 0, 0.6, 1);
+  `;
+  document.body.appendChild(zoom);
+
+  const diag  = Math.hypot(window.innerWidth, window.innerHeight);
+  const scale = (diag * 2) / 4;
+
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    zoom.style.transform = `translate(-50%, -50%) scale(${scale})`;
+  }));
+
+  setTimeout(() => { window.location.href = 'groups.html'; }, 570);
+});
+
 document.querySelector('[data-mode="settings"]').addEventListener('click', (e) => {
   const card = e.currentTarget;
   const icon = card.querySelector('.grid-icon');
