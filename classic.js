@@ -99,6 +99,7 @@ document.querySelectorAll('.panel').forEach(makeDraggable);
 // ── Ambient chime ─────────────────────────────────────────────
 
 function playChime() {
+  if (localStorage.getItem('luminesce_chimes') === 'off') return;
   const ctx = new (window.AudioContext || window.webkitAudioContext)();
   // Soft ascending bell sequence: C5, E5, G5, C6
   [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
@@ -120,8 +121,10 @@ function playChime() {
 // ── Timer ─────────────────────────────────────────────────────
 
 let timerH = 0, timerM = 25, timerS = 0;
-let timerInterval = null;
-let timerRunning  = false;
+let timerInterval  = null;
+let timerRunning   = false;
+let timerStartSecs = 0;
+let timerStartTime = 0;
 
 function renderTimer() {
   document.getElementById('tH').textContent = String(timerH).padStart(2, '0');
@@ -148,27 +151,36 @@ document.getElementById('btnTimerStart').addEventListener('click', () => {
     clearInterval(timerInterval);
     timerRunning = false;
     btn.textContent = 'Start';
+    const elapsed   = Math.floor((Date.now() - timerStartTime) / 1000);
+    const remaining = Math.max(0, timerStartSecs - elapsed);
+    timerH = Math.floor(remaining / 3600);
+    timerM = Math.floor((remaining % 3600) / 60);
+    timerS = remaining % 60;
+    renderTimer();
     return;
   }
 
   if (timerH === 0 && timerM === 0 && timerS === 0) return;
 
-  timerRunning = true;
+  timerRunning   = true;
   btn.textContent = 'Pause';
+  timerStartSecs = timerH * 3600 + timerM * 60 + timerS;
+  timerStartTime = Date.now();
 
   timerInterval = setInterval(() => {
-    if (timerH === 0 && timerM === 0 && timerS === 0) {
+    const elapsed  = Math.floor((Date.now() - timerStartTime) / 1000);
+    const secsLeft = Math.max(0, timerStartSecs - elapsed);
+    timerH = Math.floor(secsLeft / 3600);
+    timerM = Math.floor((secsLeft % 3600) / 60);
+    timerS = secsLeft % 60;
+    renderTimer();
+    if (secsLeft === 0) {
       clearInterval(timerInterval);
       timerRunning = false;
       btn.textContent = 'Start';
       playChime();
-      return;
     }
-    if (timerS > 0)       { timerS--; }
-    else if (timerM > 0)  { timerM--; timerS = 59; }
-    else if (timerH > 0)  { timerH--; timerM = 59; timerS = 59; }
-    renderTimer();
-  }, 1000);
+  }, 250);
 });
 
 document.getElementById('btnTimerReset').addEventListener('click', () => {

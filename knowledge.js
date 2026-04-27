@@ -29,6 +29,37 @@ window.onKnowledgePanelEdit = null;
   });
 })();
 
+// ── Make Knowledge Finder panel draggable via its header ──────
+
+(function initKFDraggable() {
+  const panel = document.getElementById('kfPanel');
+  if (!panel) return;
+  const handle = panel.querySelector('.kf-header');
+  if (!handle) return;
+
+  let dragging = false, origX, origY, startX, startY;
+
+  handle.addEventListener('mousedown', (e) => {
+    dragging = true;
+    const r = panel.getBoundingClientRect();
+    origX = r.left; origY = r.top;
+    startX = e.clientX; startY = e.clientY;
+    panel.style.left   = origX + 'px';
+    panel.style.top    = origY + 'px';
+    panel.style.right  = 'auto';
+    panel.style.bottom = 'auto';
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!dragging) return;
+    panel.style.left = (origX + e.clientX - startX) + 'px';
+    panel.style.top  = (origY + e.clientY - startY) + 'px';
+  });
+
+  document.addEventListener('mouseup', () => { dragging = false; });
+})();
+
 // ── Knowledge Finder ──────────────────────────────────────────
 
 async function loadKnowledgePanels() {

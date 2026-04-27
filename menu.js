@@ -23,11 +23,18 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   const name     = user.user_metadata?.username
                 || user.email.split('@')[0];
   const hour     = new Date().getHours();
-  const greeting = hour < 12 ? 'Good morning'
-                 : hour < 18 ? 'Good afternoon'
-                 :             'Good evening';
+  let greetingText;
+  if (hour >= 21 || hour < 4) {
+    greetingText = `Still up, ${name}?`;
+  } else if (hour < 12) {
+    greetingText = `Good morning, ${name}`;
+  } else if (hour < 18) {
+    greetingText = `Good afternoon, ${name}`;
+  } else {
+    greetingText = `Good evening, ${name}`;
+  }
 
-  document.getElementById('menuGreeting').textContent = `${greeting}, ${name}`;
+  document.getElementById('menuGreeting').textContent = greetingText;
 
   // Fade panel in gently after background has a moment to paint
   const panel = document.getElementById('menuPanel');

@@ -4,6 +4,8 @@
    ============================================================ */
 
 /* ── KNOWLEDGE FINDER PANEL ──────────────────────────────────── */
+.kf-panel[hidden] { display: none; }
+
 .kf-panel {
   position: fixed;
   left: 72px;
@@ -28,7 +30,10 @@
   color: rgba(244, 234, 216, 0.80);
   border-bottom: 1px solid rgba(80, 120, 230, 0.12);
   flex-shrink: 0;
+  cursor: grab;
+  user-select: none;
 }
+.kf-header:active { cursor: grabbing; }
 
 .kf-list {
   overflow-y: auto;

@@ -156,6 +156,40 @@
   background: rgba(255, 175, 70, 0.06);
 }
 
+/* ── Coming soon ribbon ──────────────────────────────────── */
+.grid-card--coming-soon {
+  cursor: not-allowed;
+  opacity: 0.55;
+  position: relative;
+  overflow: hidden;
+}
+
+.grid-card--coming-soon:hover {
+  background: rgba(12, 20, 70, 0.60);
+  border-color: rgba(80, 120, 230, 0.14);
+  box-shadow: none;
+}
+
+.grid-card--coming-soon::after {
+  content: 'Coming Soon!';
+  position: absolute;
+  top: 22px;
+  right: -30px;
+  width: 140px;
+  padding: 5px 0;
+  background: rgba(255, 165, 45, 0.20);
+  border-top: 1px solid rgba(255, 165, 45, 0.35);
+  border-bottom: 1px solid rgba(255, 165, 45, 0.35);
+  color: rgba(255, 215, 140, 0.85);
+  font-family: inherit;
+  font-size: 0.60rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-align: center;
+  transform: rotate(35deg);
+  pointer-events: none;
+}
+
 /* ── Responsive: 2-col on narrow screens ─────────────────── */
 @media (max-width: 520px) {
   .menu-panel { padding: 30px 22px 36px; }

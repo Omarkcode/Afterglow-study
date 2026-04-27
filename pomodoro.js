@@ -122,10 +122,12 @@ const BREAK_LONG  = 10 * 60;
 
 let studyLong    = false;
 let breakLong    = false;
-let pomoPhase    = 'study';
-let pomoRunning  = false;
-let pomoSecsLeft = STUDY_SHORT;
-let pomoInterval = null;
+let pomoPhase     = 'study';
+let pomoRunning   = false;
+let pomoSecsLeft  = STUDY_SHORT;
+let pomoInterval  = null;
+let pomoStartSecs = 0;
+let pomoStartTime = 0;
 
 function getStudyTime() { return studyLong ? STUDY_LONG : STUDY_SHORT; }
 function getBreakTime()  { return breakLong ? BREAK_LONG : BREAK_SHORT; }
@@ -167,12 +169,50 @@ document.getElementById('breakModeSwitch').addEventListener('change', (e) => {
   }
 });
 
+function startPomoInterval(btn) {
+  pomoStartSecs   = pomoSecsLeft;
+  pomoStartTime   = Date.now();
+  pomoRunning     = true;
+  btn.textContent = 'Pause';
+
+  pomoInterval = setInterval(() => {
+    const elapsed  = Math.floor((Date.now() - pomoStartTime) / 1000);
+    const secsLeft = Math.max(0, pomoStartSecs - elapsed);
+    pomoSecsLeft   = secsLeft;
+    renderPomoTimers();
+
+    if (secsLeft === 0) {
+      clearInterval(pomoInterval);
+      pomoRunning = false;
+      playChime();
+
+      if (pomoPhase === 'study') {
+        setPomoPhase('break');
+        pomoSecsLeft = getBreakTime();
+        renderPomoTimers();
+        showIntentionReview();
+        startPomoInterval(btn); // auto-start break timer
+      } else {
+        incrementTracker();
+        setIntentionState('input');
+        setPomoPhase('study');
+        pomoSecsLeft    = getStudyTime();
+        btn.textContent = 'Start';
+        renderPomoTimers();
+      }
+    }
+  }, 250);
+}
+
 document.getElementById('btnPomoStart').addEventListener('click', () => {
   const btn = document.getElementById('btnPomoStart');
   if (pomoRunning) {
     clearInterval(pomoInterval);
     pomoRunning = false;
     btn.textContent = 'Start';
+    const elapsed = Math.floor((Date.now() - pomoStartTime) / 1000);
+    pomoSecsLeft  = Math.max(0, pomoStartSecs - elapsed);
+    renderPomoTimers();
     return;
   }
 
@@ -186,29 +226,7 @@ document.getElementById('btnPomoStart').addEventListener('click', () => {
     }
   }
 
-  pomoRunning = true;
-  btn.textContent = 'Pause';
-
-  pomoInterval = setInterval(() => {
-    pomoSecsLeft--;
-    renderPomoTimers();
-
-    if (pomoSecsLeft <= 0) {
-      playChime();
-      if (pomoPhase === 'study') {
-        setPomoPhase('break');
-        pomoSecsLeft = getBreakTime();
-        renderPomoTimers();
-        showIntentionReview(); // show review during break
-      } else {
-        incrementTracker();
-        setIntentionState('input'); // reset for next session
-        setPomoPhase('study');
-        pomoSecsLeft = getStudyTime();
-        renderPomoTimers();
-      }
-    }
-  }, 1000);
+  startPomoInterval(btn);
 });
 
 document.getElementById('btnPomoReset').addEventListener('click', () => {
