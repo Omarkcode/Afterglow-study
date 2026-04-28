@@ -42,18 +42,36 @@ async function refresh() {
 }
 
 async function loadMyGroups() {
-  const { data, error } = await sb
+  const byId = new Map();
+
+  // Path 1: group_members with embedded join (works when FK relationship exists in Supabase)
+  const { data: memberships } = await sb
     .from('group_members')
-    .select('groups(*)')
+    .select('group_id, groups(*)')
     .eq('user_id', currentUser.id);
 
-  if (error) { console.error('loadMyGroups error:', error); return []; }
-  if (!data?.length) return [];
+  if (memberships?.length) {
+    const fromJoin = memberships.map(m => m.groups).filter(Boolean);
+    if (fromJoin.length) {
+      fromJoin.forEach(g => byId.set(g.id, g));
+    } else {
+      // Path 2: no FK relationship — look up group IDs directly
+      const ids = memberships.map(m => m.group_id);
+      if (ids.length) {
+        const { data: groups } = await sb.from('groups').select('*').in('id', ids);
+        (groups || []).forEach(g => byId.set(g.id, g));
+      }
+    }
+  }
 
-  return data
-    .map(m => m.groups)
-    .filter(Boolean)
-    .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+  // Path 3: always include groups this user created, in case group_members SELECT is blocked by RLS
+  const { data: owned } = await sb
+    .from('groups')
+    .select('*')
+    .eq('created_by', currentUser.id);
+  (owned || []).forEach(g => byId.set(g.id, g));
+
+  return [...byId.values()].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
 }
 
 // ── Sidebar ───────────────────────────────────────────────────
