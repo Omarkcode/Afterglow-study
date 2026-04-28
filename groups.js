@@ -42,21 +42,18 @@ async function refresh() {
 }
 
 async function loadMyGroups() {
-  const { data: memberships } = await sb
+  const { data, error } = await sb
     .from('group_members')
-    .select('group_id')
+    .select('groups(*)')
     .eq('user_id', currentUser.id);
 
-  if (!memberships?.length) return [];
+  if (error) { console.error('loadMyGroups error:', error); return []; }
+  if (!data?.length) return [];
 
-  const ids = memberships.map(m => m.group_id);
-  const { data: groups } = await sb
-    .from('groups')
-    .select('*')
-    .in('id', ids)
-    .order('created_at');
-
-  return groups || [];
+  return data
+    .map(m => m.groups)
+    .filter(Boolean)
+    .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
 }
 
 // ── Sidebar ───────────────────────────────────────────────────
@@ -283,12 +280,18 @@ function openCreateModal() {
       return;
     }
 
-    await sb.from('group_members').insert({
+    const { error: memberErr } = await sb.from('group_members').insert({
       group_id:     group.id,
       user_id:      currentUser.id,
       display_name: displayName,
       role:         'owner'
     });
+
+    if (memberErr) {
+      showToast('Group created but could not add you as owner. Try again.');
+      closeModal();
+      return;
+    }
 
     closeModal();
     await refresh();
