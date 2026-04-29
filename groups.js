@@ -16,6 +16,7 @@ let currentGroup      = null;
 let selectedBranch    = null;
 let pendingAttachment = null;
 let branchChannel     = null;
+let groupChannel      = null;
 let renderedMsgIds    = new Set();
 
 // ── Init ──────────────────────────────────────────────────────
@@ -111,6 +112,7 @@ async function selectGroup(group) {
   selectedGroupId = group.id;
   currentGroup    = group;
   renderSidebar();
+  subscribeToGroup(group);
 
   const detail = document.getElementById('grpDetail');
   detail.innerHTML = '<div class="grp-loading">Loading…</div>';
@@ -467,6 +469,7 @@ async function renderBranchList(branches) {
 
       const item = document.createElement('div');
       item.className = 'grp-branch-item' + (selectedBranch?.id === b.id ? ' grp-branch-item--active' : '');
+      item.dataset.branchId = b.id;
       item.innerHTML = `
         <span class="grp-branch-hash">#</span>
         <span class="grp-branch-name">${escGrp(b.name)}</span>
@@ -649,6 +652,7 @@ async function sendMessage(branch) {
 
   const { data: msg, error } = await sb.from('branch_messages').insert(payload).select().single();
   if (error) { showToast('Could not send message.'); return; }
+  markBranchRead(branch.id);
 
   if (input) input.value = '';
   pendingAttachment = null;
@@ -741,6 +745,34 @@ function subscribeToBranch(branch) {
       filter: `branch_id=eq.${branch.id}`
     }, (payload) => {
       appendMessage(payload.new);
+    })
+    .subscribe();
+}
+
+function addUnreadDot(branchId) {
+  const item = document.querySelector(`.grp-branch-item[data-branch-id="${branchId}"]`);
+  if (!item || item.querySelector('.grp-branch-unread')) return;
+  const name = item.querySelector('.grp-branch-name');
+  if (!name) return;
+  const dot = document.createElement('span');
+  dot.className = 'grp-branch-unread';
+  name.after(dot);
+}
+
+function subscribeToGroup(group) {
+  if (groupChannel) { sb.removeChannel(groupChannel); groupChannel = null; }
+  groupChannel = sb
+    .channel(`group-${group.id}-dots`)
+    .on('postgres_changes', {
+      event:  'INSERT',
+      schema: 'public',
+      table:  'branch_messages',
+      filter: `group_id=eq.${group.id}`
+    }, (payload) => {
+      const msg = payload.new;
+      if (msg.user_id === currentUser.id) return;
+      if (selectedBranch?.id === msg.branch_id) return;
+      addUnreadDot(msg.branch_id);
     })
     .subscribe();
 }
