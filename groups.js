@@ -97,7 +97,7 @@ function renderSidebar() {
     const item = document.createElement('div');
     item.className = 'grp-item' + (g.id === selectedGroupId ? ' grp-item--active' : '');
     item.innerHTML = `
-      <div class="grp-item-avatar">${escGrp(g.name[0].toUpperCase())}</div>
+      <div class="grp-item-avatar">${g.icon ? escGrp(g.icon) : escGrp(g.name[0].toUpperCase())}</div>
       <div class="grp-item-info">
         <div class="grp-item-name">${escGrp(g.name)}</div>
         <div class="grp-item-sub">${g.created_by === currentUser.id ? 'Owner' : 'Member'}</div>
@@ -134,7 +134,11 @@ function renderDetail(group, members, panels, branches) {
   detail.innerHTML = `
     <div class="grp-detail-head">
       <div class="grp-detail-top">
-        <h2 class="grp-detail-name">${escGrp(group.name)}</h2>
+        <div class="grp-detail-name-row">
+          ${group.icon ? `<span class="grp-detail-icon">${escGrp(group.icon)}</span>` : ''}
+          <h2 class="grp-detail-name">${escGrp(group.name)}</h2>
+          ${isOwner ? `<button class="grp-edit-group-btn" id="btnEditGroup" title="Edit group">✏</button>` : ''}
+        </div>
         <button class="grp-btn ${isOwner ? 'grp-btn--danger' : 'grp-btn--ghost'}" id="btnLeaveOrDelete">
           ${isOwner ? 'Delete Group' : 'Leave Group'}
         </button>
@@ -262,6 +266,87 @@ function renderDetail(group, members, panels, branches) {
 
   document.getElementById('btnAddBranch').addEventListener('click', () => {
     openCreateBranchModal(group);
+  });
+
+  if (isOwner) {
+    document.getElementById('btnEditGroup').addEventListener('click', () => {
+      openEditGroupModal(group, members);
+    });
+  }
+}
+
+// ── Edit group modal ──────────────────────────────────────────
+
+function openEditGroupModal(group, members) {
+  const memberRows = members
+    .filter(m => m.user_id !== group.created_by)
+    .map(m => `
+      <div class="grp-member-edit-row" id="memberRow-${m.user_id}">
+        <div class="grp-member-avatar" style="width:28px;height:28px;font-size:0.78rem">
+          ${escGrp(m.display_name[0].toUpperCase())}
+        </div>
+        <span class="grp-member-name" style="flex:1;font-size:0.84rem">${escGrp(m.display_name)}</span>
+        <button class="grp-btn grp-btn--danger grp-remove-member-btn"
+                data-uid="${m.user_id}" style="padding:4px 10px;font-size:0.74rem">Remove</button>
+      </div>
+    `).join('');
+
+  showModal(`
+    <div class="grp-modal-title">Edit Group</div>
+    <div class="grp-perm-row">
+      <span class="grp-perm-label">Icon (emoji)</span>
+      <input class="grp-modal-input" id="modalGroupIcon"
+             value="${escGrp(group.icon || '')}" placeholder="e.g. 🌙" maxlength="4"
+             style="width:80px;text-align:center;font-size:1.2rem">
+    </div>
+    <input class="grp-modal-input" id="modalGroupName"
+           value="${escGrp(group.name)}" maxlength="40" placeholder="Group name…">
+    ${memberRows.length ? `
+      <div class="grp-modal-members-hdr">Members</div>
+      <div class="grp-modal-members-list">${memberRows}</div>
+    ` : ''}
+    <div class="grp-modal-btns">
+      <button class="grp-btn grp-btn--ghost"   id="btnModalCancel">Cancel</button>
+      <button class="grp-btn grp-btn--primary"  id="btnModalOk">Save</button>
+    </div>
+  `);
+
+  document.getElementById('btnModalCancel').addEventListener('click', closeModal);
+
+  document.querySelectorAll('.grp-remove-member-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const uid = btn.dataset.uid;
+      if (!confirm('Remove this member from the group?')) return;
+      btn.disabled = true; btn.textContent = '…';
+      const { error } = await sb.from('group_members')
+        .delete()
+        .eq('group_id', group.id)
+        .eq('user_id', uid);
+      if (error) { showToast('Could not remove member.'); btn.disabled = false; btn.textContent = 'Remove'; return; }
+      document.getElementById(`memberRow-${uid}`)?.remove();
+      showToast('Member removed.');
+    });
+  });
+
+  document.getElementById('btnModalOk').addEventListener('click', async () => {
+    const name = document.getElementById('modalGroupName').value.trim();
+    const icon = document.getElementById('modalGroupIcon').value.trim();
+    if (!name) { document.getElementById('modalGroupName').focus(); return; }
+
+    const btn = document.getElementById('btnModalOk');
+    btn.disabled = true; btn.textContent = 'Saving…';
+
+    const { error } = await sb.from('groups')
+      .update({ name, icon: icon || null })
+      .eq('id', group.id);
+
+    if (error) { showToast('Could not save changes.'); closeModal(); return; }
+
+    closeModal();
+    await refresh();
+    const g = myGroups.find(g => g.id === group.id);
+    if (g) selectGroup(g);
+    showToast('Group updated.');
   });
 }
 
