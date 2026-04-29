@@ -294,8 +294,22 @@ async function doCreateBranch(group) {
   btn.disabled = true;
   btn.textContent = 'Creating…';
 
-  showToast(`Branch "${name}" coming soon…`);
+  const { error } = await sb.from('group_branches').insert({
+    group_id:   group.id,
+    name,
+    category:   category || null,
+    created_by: currentUser.id
+  });
+
+  if (error) {
+    showToast('Could not create branch. Try again.');
+    closeModal();
+    return;
+  }
+
   closeModal();
+  await selectGroup(group);
+  showToast(`# ${name} created!`);
 }
 
 function renderBranchList(branches) {
