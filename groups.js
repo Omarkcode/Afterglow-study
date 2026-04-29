@@ -9,9 +9,10 @@ const sb = supabase.createClient(
 
 // ── State ─────────────────────────────────────────────────────
 
-let currentUser    = null;
-let myGroups       = [];
+let currentUser     = null;
+let myGroups        = [];
 let selectedGroupId = null;
+let selectedBranch  = null;
 
 // ── Init ──────────────────────────────────────────────────────
 
@@ -332,14 +333,38 @@ function renderBranchList(branches) {
     }
     branches.filter(b => (b.category || '') === cat).forEach(b => {
       const item = document.createElement('div');
-      item.className = 'grp-branch-item';
+      item.className = 'grp-branch-item' + (selectedBranch?.id === b.id ? ' grp-branch-item--active' : '');
       item.innerHTML = `
         <span class="grp-branch-hash">#</span>
         <span class="grp-branch-name">${escGrp(b.name)}</span>
       `;
+      item.addEventListener('click', () => {
+        selectedBranch = b;
+        document.querySelectorAll('.grp-branch-item').forEach(el => el.classList.remove('grp-branch-item--active'));
+        item.classList.add('grp-branch-item--active');
+        showBranchChat(b);
+      });
       list.appendChild(item);
     });
   });
+}
+
+// ── Branch chat view ──────────────────────────────────────────
+
+function showBranchChat(branch) {
+  const main = document.getElementById('grpChatMain');
+  if (!main) return;
+
+  main.innerHTML = `
+    <div class="grp-chat-header">
+      <span class="grp-chat-header-hash">#</span>
+      <span class="grp-chat-header-name">${escGrp(branch.name)}</span>
+      ${branch.category ? `<span class="grp-chat-header-cat">${escGrp(branch.category)}</span>` : ''}
+    </div>
+    <div class="grp-messages" id="grpMessages">
+      <div class="grp-messages-empty">No messages yet — say hello!</div>
+    </div>
+  `;
 }
 
 function showDetailEmpty() {
