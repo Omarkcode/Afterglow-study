@@ -12,6 +12,7 @@ const sb = supabase.createClient(
 let currentUser       = null;
 let myGroups          = [];
 let selectedGroupId   = null;
+let currentGroup      = null;
 let selectedBranch    = null;
 let pendingAttachment = null;
 let branchChannel     = null;
@@ -111,6 +112,7 @@ function renderSidebar() {
 
 async function selectGroup(group) {
   selectedGroupId = group.id;
+  currentGroup    = group;
   renderSidebar();
 
   const detail = document.getElementById('grpDetail');
@@ -326,7 +328,15 @@ function renderBranchList(branches) {
   }
 
   list.innerHTML = '';
-  const categories = [...new Set(branches.map(b => b.category || ''))];
+  const isOwner  = currentGroup?.created_by === currentUser.id;
+  const visible  = branches.filter(b => b.can_view === 'all' || isOwner);
+
+  if (visible.length === 0) {
+    list.innerHTML = '<div class="grp-branch-empty">No branches yet.</div>';
+    return;
+  }
+
+  const categories = [...new Set(visible.map(b => b.category || ''))];
   categories.forEach(cat => {
     if (cat) {
       const catEl = document.createElement('div');
@@ -334,7 +344,7 @@ function renderBranchList(branches) {
       catEl.textContent = cat;
       list.appendChild(catEl);
     }
-    branches.filter(b => (b.category || '') === cat).forEach(b => {
+    visible.filter(b => (b.category || '') === cat).forEach(b => {
       const item = document.createElement('div');
       item.className = 'grp-branch-item' + (selectedBranch?.id === b.id ? ' grp-branch-item--active' : '');
       item.innerHTML = `
@@ -379,14 +389,20 @@ async function showBranchChat(branch) {
     </div>
   `;
 
-  document.getElementById('btnAttachPanel').addEventListener('click', openAttachPanelPicker);
-  document.getElementById('btnSendMsg').addEventListener('click', () => sendMessage(branch));
-  document.getElementById('grpChatInput').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage(branch);
-    }
-  });
+  const canPost = branch.can_post === 'all' || currentGroup?.created_by === currentUser.id;
+  if (!canPost) {
+    document.querySelector('.grp-chat-input-wrap').innerHTML =
+      '<div class="grp-chat-readonly">This branch is read-only for members.</div>';
+  } else {
+    document.getElementById('btnAttachPanel').addEventListener('click', openAttachPanelPicker);
+    document.getElementById('btnSendMsg').addEventListener('click', () => sendMessage(branch));
+    document.getElementById('grpChatInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage(branch);
+      }
+    });
+  }
 
   const { data: messages, error } = await sb
     .from('branch_messages')

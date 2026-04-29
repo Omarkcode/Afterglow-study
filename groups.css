@@ -903,6 +903,16 @@
 }
 .grp-attach-chip-remove:hover { color: rgba(255, 140, 140, 0.90); }
 
+.grp-chat-readonly {
+  text-align: center;
+  padding: 12px;
+  font-size: 0.78rem;
+  color: rgba(180, 200, 255, 0.28);
+  font-style: italic;
+  border-top: 1px solid rgba(80, 120, 230, 0.08);
+  margin-top: 12px;
+}
+
 /* ── Toast ───────────────────────────────────────────────────── */
 .grp-toast {
   position: fixed;
