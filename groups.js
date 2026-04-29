@@ -53,7 +53,7 @@ async function loadMyGroups() {
     .from('group_members')
     .select('group_id, groups(*)')
     .eq('user_id', currentUser.id);
-  console.log('[loadMyGroups] memberships:', memberships, 'error:', memErr);
+  console.log('[loadMyGroups] memberships:', memberships, 'error:', memErr ? JSON.stringify(memErr) : null);
 
   if (memberships?.length) {
     const fromJoin = memberships.map(m => m.groups).filter(Boolean);
