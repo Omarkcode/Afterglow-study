@@ -222,7 +222,9 @@
   width: 190px;
   flex-shrink: 0;
   border-right: 1px solid rgba(80, 120, 230, 0.11);
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   padding: 14px 8px;
 }
 .grp-branch-sidebar::-webkit-scrollbar       { width: 3px; }
@@ -239,6 +241,14 @@
   letter-spacing: 0.9px;
   color: rgba(180, 200, 255, 0.32);
 }
+
+.grp-branch-list {
+  flex: 1;
+  overflow-y: auto;
+}
+.grp-branch-list::-webkit-scrollbar       { width: 3px; }
+.grp-branch-list::-webkit-scrollbar-track { background: transparent; }
+.grp-branch-list::-webkit-scrollbar-thumb { background: rgba(80,120,230,0.14); border-radius: 2px; }
 
 .grp-branch-add {
   background: none;
