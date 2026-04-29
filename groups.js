@@ -49,31 +49,33 @@ async function refresh() {
 async function loadMyGroups() {
   const byId = new Map();
 
-  // Path 1: group_members with embedded join (works when FK relationship exists in Supabase)
-  const { data: memberships } = await sb
+  const { data: memberships, error: memErr } = await sb
     .from('group_members')
     .select('group_id, groups(*)')
     .eq('user_id', currentUser.id);
+  console.log('[loadMyGroups] memberships:', memberships, 'error:', memErr);
 
   if (memberships?.length) {
     const fromJoin = memberships.map(m => m.groups).filter(Boolean);
+    console.log('[loadMyGroups] fromJoin:', fromJoin);
     if (fromJoin.length) {
       fromJoin.forEach(g => byId.set(g.id, g));
     } else {
-      // Path 2: no FK relationship — look up group IDs directly
       const ids = memberships.map(m => m.group_id);
+      console.log('[loadMyGroups] path2 ids:', ids);
       if (ids.length) {
-        const { data: groups } = await sb.from('groups').select('*').in('id', ids);
+        const { data: groups, error: grpErr } = await sb.from('groups').select('*').in('id', ids);
+        console.log('[loadMyGroups] path2 groups:', groups, 'error:', grpErr);
         (groups || []).forEach(g => byId.set(g.id, g));
       }
     }
   }
 
-  // Path 3: always include groups this user created, in case group_members SELECT is blocked by RLS
-  const { data: owned } = await sb
+  const { data: owned, error: ownErr } = await sb
     .from('groups')
     .select('*')
     .eq('created_by', currentUser.id);
+  console.log('[loadMyGroups] owned:', owned, 'error:', ownErr);
   (owned || []).forEach(g => byId.set(g.id, g));
 
   return [...byId.values()].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
