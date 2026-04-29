@@ -49,33 +49,28 @@ async function refresh() {
 async function loadMyGroups() {
   const byId = new Map();
 
-  const { data: memberships, error: memErr } = await sb
+  const { data: memberships } = await sb
     .from('group_members')
     .select('group_id, groups(*)')
     .eq('user_id', currentUser.id);
-  console.log('[loadMyGroups] memberships:', memberships, 'error:', memErr ? JSON.stringify(memErr) : null);
 
   if (memberships?.length) {
     const fromJoin = memberships.map(m => m.groups).filter(Boolean);
-    console.log('[loadMyGroups] fromJoin:', fromJoin);
     if (fromJoin.length) {
       fromJoin.forEach(g => byId.set(g.id, g));
     } else {
       const ids = memberships.map(m => m.group_id);
-      console.log('[loadMyGroups] path2 ids:', ids);
       if (ids.length) {
-        const { data: groups, error: grpErr } = await sb.from('groups').select('*').in('id', ids);
-        console.log('[loadMyGroups] path2 groups:', groups, 'error:', grpErr);
+        const { data: groups } = await sb.from('groups').select('*').in('id', ids);
         (groups || []).forEach(g => byId.set(g.id, g));
       }
     }
   }
 
-  const { data: owned, error: ownErr } = await sb
+  const { data: owned } = await sb
     .from('groups')
     .select('*')
     .eq('created_by', currentUser.id);
-  console.log('[loadMyGroups] owned:', owned, 'error:', ownErr);
   (owned || []).forEach(g => byId.set(g.id, g));
 
   return [...byId.values()].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
@@ -771,7 +766,7 @@ function openCreateModal() {
       .single();
 
     if (error) {
-      showToast('Error: ' + (error.message || error.code || 'unknown'));
+      showToast('Could not create group. Try again.');
       closeModal();
       return;
     }
@@ -861,7 +856,7 @@ function openJoinModal() {
     });
 
     if (joinErr) {
-      showToast('Join error: ' + (joinErr.message || joinErr.code || 'unknown'));
+      showToast('Could not join group. Try again.');
       closeModal();
       return;
     }
