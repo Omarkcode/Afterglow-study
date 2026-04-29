@@ -139,25 +139,48 @@ function renderDetail(group, members, panels) {
       </div>
     </div>
 
-    <div class="grp-section">
-      <div class="grp-section-hdr">
-        <div class="grp-section-hdr-left">
-          <span class="grp-section-title">Members</span>
-          <span class="grp-section-count">${members.length}</span>
-        </div>
-      </div>
-      <div class="grp-members-list" id="grpMembersList"></div>
-    </div>
+    <div class="grp-detail-cols">
 
-    <div class="grp-section">
-      <div class="grp-section-hdr">
-        <div class="grp-section-hdr-left">
-          <span class="grp-section-title">Shared Panels</span>
-          <span class="grp-section-count">${panels.length}</span>
+      <nav class="grp-branch-sidebar">
+        <div class="grp-branch-sidebar-hdr">
+          <span>Branches</span>
+          <button class="grp-branch-add" id="btnAddBranch">+</button>
         </div>
-        <button class="grp-btn grp-btn--amber" id="btnSharePanel">Share a Panel</button>
+        <div class="grp-branch-list" id="grpBranchList">
+          <div class="grp-branch-item">
+            <span class="grp-branch-hash">#</span>
+            <span class="grp-branch-name">general</span>
+          </div>
+          <div class="grp-branch-item">
+            <span class="grp-branch-hash">#</span>
+            <span class="grp-branch-name">study-notes</span>
+          </div>
+        </div>
+      </nav>
+
+      <div class="grp-chat-main" id="grpChatMain">
+        <div class="grp-section">
+          <div class="grp-section-hdr">
+            <div class="grp-section-hdr-left">
+              <span class="grp-section-title">Members</span>
+              <span class="grp-section-count">${members.length}</span>
+            </div>
+          </div>
+          <div class="grp-members-list" id="grpMembersList"></div>
+        </div>
+
+        <div class="grp-section">
+          <div class="grp-section-hdr">
+            <div class="grp-section-hdr-left">
+              <span class="grp-section-title">Shared Panels</span>
+              <span class="grp-section-count">${panels.length}</span>
+            </div>
+            <button class="grp-btn grp-btn--amber" id="btnSharePanel">Share a Panel</button>
+          </div>
+          <div class="grp-panels-grid" id="grpPanelsGrid"></div>
+        </div>
       </div>
-      <div class="grp-panels-grid" id="grpPanelsGrid"></div>
+
     </div>
   `;
 
