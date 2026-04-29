@@ -425,7 +425,6 @@ async function getLatestMessageTimes(branchIds) {
     .select('branch_id, sent_at')
     .in('branch_id', branchIds)
     .order('sent_at', { ascending: false });
-  console.log('[unread] branch_messages query data:', data, 'error:', error ? JSON.stringify(error) : null);
   const latest = {};
   (data || []).forEach(msg => {
     if (!latest[msg.branch_id]) latest[msg.branch_id] = msg.sent_at;
@@ -452,7 +451,6 @@ async function renderBranchList(branches) {
   }
 
   const latestTimes = await getLatestMessageTimes(visible.map(b => b.id));
-  console.log('[unread] latestTimes:', latestTimes);
 
   const categories = [...new Set(visible.map(b => b.category || ''))];
   categories.forEach(cat => {
@@ -466,7 +464,6 @@ async function renderBranchList(branches) {
       const latest   = latestTimes[b.id];
       const readTime = getBranchReadTime(b.id);
       const unread   = latest && (selectedBranch?.id !== b.id) && (!readTime || latest > readTime);
-      console.log('[unread] branch:', b.name, 'latest:', latest, 'readTime:', readTime, 'unread:', unread);
 
       const item = document.createElement('div');
       item.className = 'grp-branch-item' + (selectedBranch?.id === b.id ? ' grp-branch-item--active' : '');
@@ -481,6 +478,8 @@ async function renderBranchList(branches) {
         selectedBranch = b;
         document.querySelectorAll('.grp-branch-item').forEach(el => el.classList.remove('grp-branch-item--active'));
         item.classList.add('grp-branch-item--active');
+        const dot = item.querySelector('.grp-branch-unread');
+        if (dot) dot.remove();
         showBranchChat(b);
       });
       if (isOwner) {
