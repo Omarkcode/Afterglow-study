@@ -352,7 +352,7 @@ function renderBranchList(branches) {
 
 // ── Branch chat view ──────────────────────────────────────────
 
-function showBranchChat(branch) {
+async function showBranchChat(branch) {
   const main = document.getElementById('grpChatMain');
   if (!main) return;
   pendingAttachment = null;
@@ -364,7 +364,7 @@ function showBranchChat(branch) {
       ${branch.category ? `<span class="grp-chat-header-cat">${escGrp(branch.category)}</span>` : ''}
     </div>
     <div class="grp-messages" id="grpMessages">
-      <div class="grp-messages-empty">No messages yet — say hello!</div>
+      <div class="grp-messages-empty">Loading…</div>
     </div>
     <div class="grp-chat-input-wrap">
       <div class="grp-attachment-preview" id="grpAttachPreview" hidden></div>
@@ -385,6 +385,24 @@ function showBranchChat(branch) {
       sendMessage(branch);
     }
   });
+
+  const { data: messages, error } = await sb
+    .from('branch_messages')
+    .select('*')
+    .eq('branch_id', branch.id)
+    .order('sent_at');
+
+  const msgArea = document.getElementById('grpMessages');
+  if (!msgArea) return;
+
+  if (error || !messages?.length) {
+    msgArea.innerHTML = '<div class="grp-messages-empty">No messages yet — say hello!</div>';
+    return;
+  }
+
+  msgArea.innerHTML = '';
+  messages.forEach(m => appendMessage(m));
+  msgArea.scrollTop = msgArea.scrollHeight;
 }
 
 async function openAttachPanelPicker() {
