@@ -769,7 +769,7 @@ function openCreateModal() {
       .single();
 
     if (error) {
-      showToast('Could not create group. Try again.');
+      showToast('Error: ' + (error.message || error.code || 'unknown'));
       closeModal();
       return;
     }
