@@ -18,9 +18,12 @@
   backdrop-filter: blur(20px);
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: auto;
   z-index: 50;
   box-shadow: 0 8px 32px rgba(0,0,0,0.40);
+  min-width: 220px;
+  min-height: 120px;
+  resize: both;
 }
 
 .kf-header {

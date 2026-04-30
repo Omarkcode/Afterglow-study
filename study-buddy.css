@@ -392,6 +392,10 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+  min-width: 180px;
+  min-height: 80px;
+  resize: both;
+  overflow: auto;
 }
 
 .sb-usage-panel[hidden] { display: none; }

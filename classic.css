@@ -88,8 +88,10 @@
   box-shadow:
     0 0 40px 8px  rgba(40, 70, 200, 0.10),
     0 20px 50px   rgba(0, 0, 0, 0.50);
-  overflow: hidden;
-  min-width: 260px;
+  overflow: auto;
+  min-width: 220px;
+  min-height: 80px;
+  resize: both;
 }
 
 /* Default positions */
