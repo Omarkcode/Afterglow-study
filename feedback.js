@@ -7,6 +7,7 @@ const sb = supabase.createClient(
   'sb_publishable_EWpwtIRhvsIQMbNaiKIrPg_vLbgOMNp'
 );
 
+const DEV_ID = '0b6cdbd0-b937-4644-827c-3bc7a4d027fe';
 let currentUser = null;
 
 (async () => {
@@ -40,26 +41,28 @@ async function loadFeedback() {
   const list = document.getElementById('fbMessages');
 
   if (error || !data?.length) {
-    list.innerHTML = '<div class="fb-empty">No feedback sent yet. We\'d love to hear from you!</div>';
+    list.innerHTML = '<div class="fb-empty">No messages yet. We\'d love to hear from you!</div>';
     return;
   }
 
   list.innerHTML = '';
-  data.forEach(row => appendFeedback(row));
+  data.forEach(row => appendMessage(row));
   list.scrollTop = list.scrollHeight;
 }
 
-function appendFeedback(row) {
-  const list = document.getElementById('fbMessages');
-  const el   = document.createElement('div');
-  el.className = 'fb-message';
+function appendMessage(row) {
+  const list   = document.getElementById('fbMessages');
+  const isDev  = row.is_dev_reply === true;
+  const el     = document.createElement('div');
+  el.className = isDev ? 'fb-message fb-message--dev' : 'fb-message';
 
   const date = new Date(row.created_at).toLocaleDateString(undefined, {
-    month: 'short', day: 'numeric', year: 'numeric',
+    month: 'short', day: 'numeric',
     hour: '2-digit', minute: '2-digit'
   });
 
   el.innerHTML = `
+    ${isDev ? `<div class="fb-message-sender">Stellar <span class="fb-dev-badge">[DEV]</span></div>` : ''}
     <div class="fb-message-text">${escFb(row.message)}</div>
     <div class="fb-message-time">${date}</div>
   `;
@@ -76,14 +79,15 @@ async function sendFeedback() {
   btn.textContent = 'Sending…';
 
   const { data, error } = await sb.from('feedback').insert({
-    user_id: currentUser.id,
-    message
+    user_id:      currentUser.id,
+    message,
+    is_dev_reply: false
   }).select().single();
 
   if (error) {
     btn.disabled = false;
     btn.textContent = 'Send';
-    showToast('Could not send feedback. Please try again.');
+    showToast('Could not send. Please try again.');
     return;
   }
 
@@ -95,9 +99,9 @@ async function sendFeedback() {
   const empty = list.querySelector('.fb-empty');
   if (empty) empty.remove();
 
-  appendFeedback(data);
+  appendMessage(data);
   list.scrollTop = list.scrollHeight;
-  showToast('Feedback sent — thank you!');
+  showToast('Sent — thank you!');
 }
 
 function showToast(msg) {
