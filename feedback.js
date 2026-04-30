@@ -9,6 +9,7 @@ const sb = supabase.createClient(
 
 const DEV_ID = '0b6cdbd0-b937-4644-827c-3bc7a4d027fe';
 let currentUser = null;
+let realtimeChannel = null;
 
 (async () => {
   const { data: { session } } = await sb.auth.getSession();
@@ -20,8 +21,10 @@ let currentUser = null;
   document.getElementById('fbPage').style.transition = 'opacity 0.4s ease';
 
   await loadFeedback();
+  subscribeToReplies();
 
   document.getElementById('btnBack').addEventListener('click', () => {
+    if (realtimeChannel) sb.removeChannel(realtimeChannel);
     window.location.href = 'menu.html';
   });
 
@@ -50,9 +53,29 @@ async function loadFeedback() {
   list.scrollTop = list.scrollHeight;
 }
 
+function subscribeToReplies() {
+  realtimeChannel = sb
+    .channel('feedback-replies-' + currentUser.id)
+    .on('postgres_changes', {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'feedback',
+      filter: `user_id=eq.${currentUser.id}`
+    }, (payload) => {
+      const row = payload.new;
+      if (!row.is_dev_reply) return; // user's own inserts handled by sendFeedback()
+      const list = document.getElementById('fbMessages');
+      const empty = list.querySelector('.fb-empty');
+      if (empty) empty.remove();
+      appendMessage(row);
+      list.scrollTop = list.scrollHeight;
+    })
+    .subscribe();
+}
+
 function appendMessage(row) {
   const list   = document.getElementById('fbMessages');
-  const isDev  = row.is_dev_reply === true;
+  const isDev  = !!row.is_dev_reply;
   const el     = document.createElement('div');
   el.className = isDev ? 'fb-message fb-message--dev' : 'fb-message';
 
