@@ -9,6 +9,7 @@ const sb = supabase.createClient(
 
 const DEV_ID = '0b6cdbd0-b937-4644-827c-3bc7a4d027fe';
 let selectedUserId = null;
+let threadChannel = null;
 
 (async () => {
   const { data: { session } } = await sb.auth.getSession();
@@ -22,11 +23,56 @@ let selectedUserId = null;
   document.getElementById('admPage').style.transition = 'opacity 0.4s ease';
 
   document.getElementById('btnBack').addEventListener('click', () => {
+    if (threadChannel) sb.removeChannel(threadChannel);
     window.location.href = 'menu.html';
   });
 
   await loadThreads();
+  subscribeToAllMessages();
 })();
+
+function subscribeToAllMessages() {
+  // Watch for any new user message — update sidebar thread preview live
+  sb.channel('adm-all-feedback')
+    .on('postgres_changes', {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'feedback'
+    }, (payload) => {
+      const row = payload.new;
+      if (row.is_dev_reply) return; // dev's own replies handled by sendReply()
+
+      // Update or add sidebar thread item
+      const list = document.getElementById('admThreadList');
+      let item = list.querySelector(`[data-user-id="${row.user_id}"]`);
+      if (item) {
+        item.querySelector('.adm-thread-preview').innerHTML =
+          escAdm(row.message).slice(0, 48) + '…';
+      } else {
+        item = document.createElement('div');
+        item.className = 'adm-thread-item';
+        item.dataset.userId = row.user_id;
+        item.innerHTML = `
+          <div class="adm-thread-id">${row.user_id.slice(0, 8)}…</div>
+          <div class="adm-thread-preview">${escAdm(row.message).slice(0, 48)}…</div>
+        `;
+        item.addEventListener('click', () => openThread(row.user_id, item));
+        list.prepend(item);
+        // clear "no feedback" placeholder if present
+        list.querySelector('.adm-empty')?.remove();
+      }
+
+      // If this thread is open, append the message live
+      if (row.user_id === selectedUserId) {
+        const messages = document.getElementById('admMessages');
+        if (messages) {
+          appendAdmMessage(row, messages);
+          messages.scrollTop = messages.scrollHeight;
+        }
+      }
+    })
+    .subscribe();
+}
 
 async function loadThreads() {
   const { data, error } = await sb
