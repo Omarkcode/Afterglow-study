@@ -8,6 +8,8 @@ const SUPABASE_URL = 'https://rdnswueidjqnxgkhvrjf.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_EWpwtIRhvsIQMbNaiKIrPg_vLbgOMNp';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+const DEV_ID = '0b6cdbd0-b937-4644-827c-3bc7a4d027fe';
+
 // ── Auth gate — redirect if not logged in ─────────────────────
 
 (async () => {
@@ -35,6 +37,10 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   }
 
   document.getElementById('menuGreeting').textContent = greetingText;
+
+  if (user.id === DEV_ID) {
+    document.getElementById('btnAdmin').style.display = '';
+  }
 
   // Fade panel in gently after background has a moment to paint
   const panel = document.getElementById('menuPanel');
@@ -257,4 +263,34 @@ document.querySelector('[data-mode="feedback"]').addEventListener('click', (e) =
   }));
 
   setTimeout(() => { window.location.href = 'feedback.html'; }, 570);
+});
+
+document.getElementById('btnAdmin').addEventListener('click', (e) => {
+  const card = e.currentTarget;
+  const icon = card.querySelector('.grid-icon');
+  const r    = icon.getBoundingClientRect();
+
+  const zoom = document.createElement('div');
+  zoom.style.cssText = `
+    position: fixed;
+    left: ${r.left + r.width  / 2}px;
+    top:  ${r.top  + r.height / 2}px;
+    width: 4px; height: 4px;
+    background: #06091a;
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(1);
+    z-index: 1000;
+    pointer-events: none;
+    transition: transform 0.55s cubic-bezier(0.4, 0, 0.6, 1);
+  `;
+  document.body.appendChild(zoom);
+
+  const diag  = Math.hypot(window.innerWidth, window.innerHeight);
+  const scale = (diag * 2) / 4;
+
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    zoom.style.transform = `translate(-50%, -50%) scale(${scale})`;
+  }));
+
+  setTimeout(() => { window.location.href = 'admin.html'; }, 570);
 });

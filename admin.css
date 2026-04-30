@@ -1,0 +1,223 @@
+/* ============================================================
+   admin.css
+   ============================================================ */
+
+.adm-page {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+}
+
+/* ── Header ─────────────────────────────────────────────────── */
+.adm-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 28px;
+  border-bottom: 1px solid rgba(80, 120, 230, 0.12);
+  flex-shrink: 0;
+  background: rgba(6, 9, 26, 0.55);
+  backdrop-filter: blur(12px);
+}
+
+.adm-back {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 1px solid rgba(80, 120, 230, 0.22);
+  border-radius: 8px;
+  color: rgba(180, 200, 255, 0.65);
+  font-size: 0.78rem;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.adm-back:hover {
+  background: rgba(80, 120, 230, 0.10);
+  color: rgba(220, 230, 255, 0.90);
+}
+
+.adm-title {
+  font-family: 'Dancing Script', cursive;
+  font-size: 1.5rem;
+  color: rgba(244, 234, 216, 0.88);
+  font-weight: 500;
+}
+
+.adm-header-right { width: 72px; }
+
+/* ── Body ───────────────────────────────────────────────────── */
+.adm-body {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* ── Sidebar ────────────────────────────────────────────────── */
+.adm-sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  border-right: 1px solid rgba(80, 120, 230, 0.11);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 14px 8px;
+}
+
+.adm-sidebar-hdr {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.9px;
+  color: rgba(180, 200, 255, 0.32);
+  padding: 0 6px 10px;
+}
+
+.adm-thread-list {
+  flex: 1;
+  overflow-y: auto;
+}
+.adm-thread-list::-webkit-scrollbar       { width: 3px; }
+.adm-thread-list::-webkit-scrollbar-track { background: transparent; }
+.adm-thread-list::-webkit-scrollbar-thumb { background: rgba(80,120,230,0.14); border-radius: 2px; }
+
+.adm-thread-item {
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.adm-thread-item:hover           { background: rgba(255,255,255,0.04); }
+.adm-thread-item--active         { background: rgba(255,175,70,0.09); }
+.adm-thread-item--active:hover   { background: rgba(255,175,70,0.13); }
+
+.adm-thread-id {
+  font-size: 0.75rem;
+  color: rgba(220, 230, 255, 0.75);
+  font-weight: 600;
+  margin-bottom: 3px;
+}
+
+.adm-thread-preview {
+  font-size: 0.72rem;
+  color: rgba(180, 200, 255, 0.38);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.adm-empty {
+  font-size: 0.82rem;
+  color: rgba(180, 200, 255, 0.35);
+  padding: 12px 6px;
+}
+
+/* ── Conversation ───────────────────────────────────────────── */
+.adm-convo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 20px 28px 24px;
+}
+
+.adm-convo-empty {
+  font-size: 0.84rem;
+  color: rgba(180, 200, 255, 0.30);
+  margin: auto;
+}
+
+.adm-messages {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.adm-messages::-webkit-scrollbar       { width: 4px; }
+.adm-messages::-webkit-scrollbar-track { background: transparent; }
+.adm-messages::-webkit-scrollbar-thumb { background: rgba(80,120,230,0.18); border-radius: 2px; }
+
+.adm-message {
+  max-width: 78%;
+  padding: 9px 13px;
+  border-radius: 12px;
+}
+
+.adm-message--user {
+  align-self: flex-start;
+  background: rgba(60, 100, 220, 0.14);
+  border: 1px solid rgba(80, 120, 230, 0.20);
+  border-radius: 12px 12px 12px 4px;
+}
+
+.adm-message--dev {
+  align-self: flex-end;
+  background: rgba(255, 175, 70, 0.10);
+  border: 1px solid rgba(255, 175, 70, 0.22);
+  border-radius: 12px 12px 4px 12px;
+}
+
+.adm-message-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: rgba(180, 200, 255, 0.40);
+  margin-bottom: 3px;
+}
+.adm-message--dev .adm-message-label { color: rgba(255, 200, 100, 0.60); }
+
+.adm-message-text {
+  font-size: 0.86rem;
+  color: rgba(220, 230, 255, 0.85);
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.adm-message-time {
+  font-size: 0.68rem;
+  color: rgba(180, 200, 255, 0.28);
+  margin-top: 4px;
+  text-align: right;
+}
+
+/* ── Input ──────────────────────────────────────────────────── */
+.adm-input-wrap {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+
+.adm-input {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(80, 120, 230, 0.22);
+  border-radius: 12px;
+  color: rgba(220, 230, 255, 0.88);
+  font-size: 0.88rem;
+  padding: 10px 14px;
+  resize: none;
+  outline: none;
+  font-family: inherit;
+  line-height: 1.5;
+  transition: border-color 0.15s;
+}
+.adm-input:focus      { border-color: rgba(80, 120, 230, 0.50); }
+.adm-input::placeholder { color: rgba(180, 200, 255, 0.28); }
+
+.adm-send {
+  background: rgba(255, 175, 70, 0.22);
+  border: 1px solid rgba(255, 175, 70, 0.35);
+  border-radius: 12px;
+  color: rgba(255, 220, 140, 0.90);
+  font-size: 0.84rem;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+.adm-send:hover    { background: rgba(255, 175, 70, 0.35); }
+.adm-send:disabled { opacity: 0.5; cursor: default; }
